@@ -6,11 +6,22 @@ The idea behind the project is simple: if one assumption changes, the effect sho
 
 The project is not intended to be a production banking system. It is a learning and simulation tool that uses simplified formulas so the calculations are transparent.
 
+Live app: https://ragunath1242001-finanical-modelling-app-k7vjy7.streamlit.app/
+
+## Screenshots
+
+The screenshots below show the main learning and risk workflow.
+
+![Executive Overview](docs/assets/executive_overview.png)
+
+![Banking 101](docs/assets/banking_101.png)
+
 ## What Is Included
 
 The app currently contains these sections:
 
 - Executive Overview
+- Banking 101
 - Credit Risk
 - IFRS 9 ECL
 - Basel Capital and IRB
@@ -31,6 +42,8 @@ The app currently contains these sections:
 
 Most pages follow the same structure: input assumptions, calculated outputs, charts or tables, a calculation trace, and an explanation.
 
+The `Banking 101` page is for someone starting from zero. It explains basic banking, loan products, mortgages, collateral, PD, LGD, EAD, IFRS 9, capital, liquidity, fraud, AML, model risk, and regulation before the user enters the deeper modules.
+
 The `Documentation & Study Guide` page is built into the app as a revision section with two modes:
 
 - `Learning mode`: topic tree, definitions, project usage, formulas, memory hooks, practice questions, and interactive mini calculators.
@@ -41,6 +54,34 @@ The `Credit Risk` and `IFRS 9 ECL` pages include mode selectors for deeper analy
 The end-to-end case study mode connects several modules into guided scenarios and shows how a trigger flows through PD/LGD, ECL, profit, CET1, COREP-style ratio impact, and governance actions.
 
 Several pages also include download buttons for reports such as capital summary, model validation summary, IFRS 9 scenario ECL, ECL bridge, BCBS 239 issue log, DORA incident report, and end-to-end case study report.
+
+The Executive Overview includes a downloadable data dictionary and field inventory so the user can inspect what each dataset contains and how the fields are used.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A[Synthetic Data\ncustomers, loans, transactions, financials] --> B[Data Quality and Governance\nBCBS 239, reconciliation, lineage, audit]
+    A --> C[Risk Engines\nCredit risk, IFRS 9, Basel, CRR3, liquidity, stress, XVA]
+    A --> D[Financial Crime\nFraud and AML alerts]
+    C --> E[Reporting Layer\nCOREP, FINREP, PDF reports, executive metrics]
+    D --> E
+    B --> E
+    E --> F[Streamlit App\nDashboard, labs, case studies, study guide]
+    G[Banking 101] --> F
+    H[Documentation and Study Guide] --> F
+```
+
+The app keeps most calculation logic under `src/` and uses `app.py` mainly as the Streamlit interface layer. This makes the formulas easier to test and keeps the user interface separate from the business logic.
+
+## Role-Based Learning Paths
+
+The Executive Overview includes role-based paths for common job families:
+
+- `Credit Risk Analyst`: Banking 101, borrower-level expected loss, model development, IFRS 9, stress testing, and study guide questions.
+- `Model Risk Analyst`: model development metrics, validation, drift, monitoring, explainability, fairness, data quality, and governance evidence.
+- `Regulatory Reporting Analyst`: IFRS 9, Basel capital, CRR3, COREP/FINREP, RWA, CET1, and BCBS 239 controls.
+- `Operational Resilience / Governance Analyst`: BCBS 239, DORA, EU AI Act, fraud/AML controls, audit trail, and incident case studies.
 
 ## Main Concepts
 
@@ -307,12 +348,13 @@ The synthetic data intentionally includes imperfections:
 
 This makes the governance and reconciliation pages more realistic.
 
+The data is designed as a connected portfolio narrative rather than isolated tables. A user can start with a customer, inspect the loan, calculate expected loss, assign IFRS 9 stage, estimate capital impact, review transaction alerts, check data quality, and download evidence reports. More detail is available in [`docs/portfolio_narrative.md`](docs/portfolio_narrative.md).
+
 ## Project Structure
 
 ```text
 app.py
 requirements.txt
-PROJECT_BUILD_SPEC.md
 data/
   synthetic/
 docs/
@@ -368,6 +410,7 @@ pytest
 ```
 
 The tests cover the main formulas and checks, including IFRS 9 ECL, staging, Basel ratios, liquidity ratios, reconciliation, audit logging, CRR3, reverse stress testing, AI governance, DORA, climate risk, and XVA.
+They also cover Banking 101 content structure and PDF generation.
 
 ## Limitations
 
@@ -388,11 +431,9 @@ This is an independent educational project using synthetic data. It should not b
 
 ## Possible Improvements
 
-- Add downloadable COREP and FINREP-style report templates.
 - Add better model performance charts for the PD and fraud models.
 - Add calibration and backtesting views.
 - Add Monte Carlo exposure simulation for XVA.
 - Add richer climate scenario assumptions by sector and geography.
-- Add downloadable DORA incident and third-party oversight reports.
 - Add persistent scenario storage for comparing multiple stress runs.
 - Add more topic-specific exercises to the in-app documentation page.

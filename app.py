@@ -426,6 +426,7 @@ if st.sidebar.button(DOCS_PAGE):
     st.session_state.page = DOCS_PAGE
 if st.sidebar.button(BANKING_101_PAGE):
     st.session_state.page = BANKING_101_PAGE
+st.sidebar.caption(f"Current page: {st.session_state.page}")
 
 page = st.session_state.page
 adjusted_pd = (loans["pd"].fillna(loans["pd"].median()) * (1 + pd_shock)).clip(0, 1)
@@ -522,6 +523,42 @@ CAPABILITY_MAP = [
 ]
 
 
+ROLE_LEARNING_PATHS = {
+    "Credit Risk Analyst": [
+        "Banking 101: What a bank does, loans, collateral, LTV, PD/LGD/EAD.",
+        "Credit Risk: inspect borrower-level expected loss and reason codes.",
+        "Credit Risk Model Development Lab: compare baseline and challenger PD models.",
+        "IFRS 9 ECL: connect borrower deterioration to staging and provisions.",
+        "Stress Testing: explain how macro shocks raise PD, LGD, ECL, and capital pressure.",
+        "Documentation & Study Guide: revise credit risk formulas and self-check questions.",
+    ],
+    "Model Risk Analyst": [
+        "Banking 101: understand why banks use models and where model outputs affect decisions.",
+        "Credit Risk Model Development Lab: review AUC, calibration, Brier score, threshold, and PSI.",
+        "Model Risk Management: inspect inventory, validation findings, drift, and monitoring evidence.",
+        "EU AI Act Governance: review explainability, fairness gap, human oversight, and control evidence.",
+        "BCBS 239 Governance: connect data quality problems to model reliability.",
+        "Documentation & Study Guide: revise model risk, validation, calibration, and governance topics.",
+    ],
+    "Regulatory Reporting Analyst": [
+        "Banking 101: learn balance sheet, provisions, capital, liquidity, and regulatory purpose.",
+        "IFRS 9 ECL: understand provision movement and profit impact.",
+        "Basel Capital and IRB: learn CET1, RWA, capital ratios, and simplified IRB comparison.",
+        "CRR3 Basel Final Reforms: review output floor, operational risk SMA, and CVA-lite.",
+        "COREP/FINREP Reporting: connect capital and financial reporting views.",
+        "BCBS 239 Governance: check completeness, accuracy, consistency, timeliness, and traceability.",
+    ],
+    "Operational Resilience / Governance Analyst": [
+        "Banking 101: learn why banks need controls, resilience, and reliable reporting.",
+        "BCBS 239 Governance: review data quality, lineage, reconciliation, and issue workflow.",
+        "DORA Operational Resilience: classify ICT incidents and assess third-party resilience.",
+        "EU AI Act Governance: review AI controls and post-deployment monitoring.",
+        "Fraud and AML: understand alert thresholds, false positives, and suspicious activity review.",
+        "Documentation & Study Guide: use case studies to connect incidents to management actions.",
+    ],
+}
+
+
 def dataset_summary() -> pd.DataFrame:
     frames = {
         "Customers": customers,
@@ -563,6 +600,30 @@ def field_inventory() -> pd.DataFrame:
                 }
             )
     return pd.DataFrame(rows)
+
+
+def data_dictionary_pdf() -> bytes:
+    inventory = field_inventory()
+    sections = {
+        "Portfolio Narrative": (
+            "The synthetic bank portfolio represents a small European-style retail and SME banking book. "
+            "Customers hold loans, generate transactions, and feed financial trends. The data intentionally includes missing values, "
+            "stale records, duplicate identifiers, invalid loan amounts, exposure mismatches, and suspicious transaction patterns so the app can demonstrate risk analytics and governance controls."
+        ),
+        "Dataset Summary": "\n".join(
+            f"- {row.dataset}: {row.rows} rows, {row.fields} fields, {row.missing_values} missing values, {row.duplicate_rows} duplicate rows"
+            for row in dataset_summary().itertuples(index=False)
+        ),
+        "Field Inventory": "\n".join(
+            f"- {row.dataset}.{row.field} ({row.type}): {row.definition}; missing values: {row.missing}"
+            for row in inventory.itertuples(index=False)
+        ),
+        "How To Use The Data": (
+            "Start with customers and loans to understand borrower risk. Use transactions for fraud and AML monitoring. "
+            "Use financial trends for forecasting and reporting context. Then use governance checks to see how data quality affects confidence in risk outputs."
+        ),
+    }
+    return pdf_report_bytes("Data Dictionary and Portfolio Narrative", sections)
 
 
 @st.cache_data
@@ -768,7 +829,7 @@ if page == "Executive Overview":
         ]
     )
 
-    overview_tab, data_tab, capability_tab, action_tab = st.tabs(["Dashboard", "Data Ingested", "Learning & Testing", "Actions & Report"])
+    overview_tab, data_tab, capability_tab, role_tab, action_tab = st.tabs(["Dashboard", "Data Ingested", "Learning & Testing", "Role Paths", "Actions & Report"])
 
     with overview_tab:
         chart_left, chart_right = st.columns([1.4, 1])
@@ -797,6 +858,12 @@ if page == "Executive Overview":
 
     with data_tab:
         st.write("These are the synthetic datasets currently loaded into the app and used across the risk, reporting, financial crime, and governance modules.")
+        st.info(
+            "Dataset narrative: this synthetic portfolio behaves like a compact retail and SME bank. "
+            "Borrowers have income, credit score, debt burden, products, collateral indicators, and repayment behaviour. "
+            "Transactions add fraud and AML signals, while financial time series add reporting and forecasting context. "
+            "The data deliberately contains quality issues so BCBS 239, reconciliation, audit, and model monitoring checks have realistic problems to detect."
+        )
         st.dataframe(dataset_summary(), width="stretch")
         data_left, data_right = st.columns([1, 1])
         with data_left:
@@ -818,7 +885,23 @@ if page == "Executive Overview":
             st.subheader("Data Quality Signals")
             st.dataframe(quality_table, width="stretch")
         st.subheader("Field Inventory")
-        st.dataframe(field_inventory(), width="stretch", height=420)
+        inventory = field_inventory()
+        download_left, download_right = st.columns([1, 1])
+        with download_left:
+            st.download_button(
+                "Download data dictionary PDF",
+                data_dictionary_pdf(),
+                file_name="data_dictionary.pdf",
+                mime="application/pdf",
+            )
+        with download_right:
+            st.download_button(
+                "Download field inventory CSV",
+                dataframe_csv_bytes(inventory),
+                file_name="field_inventory.csv",
+                mime="text/csv",
+            )
+        st.dataframe(inventory, width="stretch", height=420)
 
     with capability_tab:
         st.write("Use this view as a map of what the platform can help you understand, test, and explain.")
@@ -836,6 +919,15 @@ if page == "Executive Overview":
             st.subheader("Decision Practice")
             for item in ["Management actions", "Threshold tuning", "Capital sensitivity", "Case study explanation", "Downloadable evidence reports"]:
                 st.write(f"- {item}")
+
+    with role_tab:
+        st.write("Use these paths when preparing for specific job families. Each path starts with the beginner layer and then moves into the relevant risk modules.")
+        selected_role = st.selectbox("Select role path", list(ROLE_LEARNING_PATHS))
+        for step_number, step in enumerate(ROLE_LEARNING_PATHS[selected_role], start=1):
+            with st.container(border=True):
+                st.markdown(f"#### Step {step_number}")
+                st.write(step)
+        st.info("Tip: after finishing a path, use the Documentation & Study Guide case studies to explain the full chain from data to risk output to management action.")
 
     with action_tab:
         st.subheader("Management Actions")

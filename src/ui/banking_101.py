@@ -471,7 +471,8 @@ def render_banking_101() -> None:
 
     with overview_tab:
         st.write("Use this as a beginner map before going into the detailed risk modules.")
-        st.dataframe(summary, width="stretch", hide_index=True)
+        overview = summary.rename(columns={"area": "Area", "topic": "Topic", "why_it_matters": "Why it matters"})
+        st.dataframe(overview, width="stretch", hide_index=True)
         col_a, col_b, col_c = st.columns(3)
         with col_a:
             st.metric("Beginner Topics", len(BANKING_101_TOPICS))
