@@ -2,7 +2,8 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
-.streamlit/
+.streamlit/*
+!.streamlit/config.toml
 data/processed/*.sqlite
 data/processed/*.sqlite-*
 .DS_Store

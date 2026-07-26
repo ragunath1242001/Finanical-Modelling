@@ -50,6 +50,265 @@ from src.ui.study_guide import render_study_guide
 st.set_page_config(page_title="European Financial Risk Platform", layout="wide")
 
 
+def inject_custom_style() -> None:
+    st.markdown(
+        """
+        <style>
+        :root {
+            --ink: #17202A;
+            --muted: #5D6D7E;
+            --panel: #FFFFFF;
+            --line: #D9E2EC;
+            --teal: #0F766E;
+            --teal-dark: #115E59;
+            --blue: #2563EB;
+            --amber: #B7791F;
+            --rose: #B42318;
+            --soft-blue: #EAF2FF;
+            --soft-teal: #E6F4F1;
+            --soft-amber: #FFF7E6;
+        }
+
+        .stApp {
+            background:
+                linear-gradient(180deg, #F4F8FB 0%, #F7FAFC 42%, #F5F7FA 100%);
+            color: var(--ink);
+        }
+
+        section[data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #102A43 0%, #123B52 58%, #0F766E 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        section[data-testid="stSidebar"] * {
+            color: #F8FAFC !important;
+        }
+
+        section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.28);
+            border-radius: 8px;
+        }
+
+        section[data-testid="stSidebar"] .stSlider [data-testid="stTickBar"] {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        .main .block-container {
+            padding-top: 1.5rem;
+            max-width: 1320px;
+        }
+
+        .app-hero {
+            background:
+                linear-gradient(135deg, rgba(15, 118, 110, 0.96), rgba(37, 99, 235, 0.86) 54%, rgba(183, 121, 31, 0.86));
+            border: 1px solid rgba(255, 255, 255, 0.38);
+            border-radius: 12px;
+            padding: 1.25rem 1.35rem;
+            margin: 0.25rem 0 1.2rem 0;
+            box-shadow: 0 18px 45px rgba(16, 42, 67, 0.18);
+        }
+
+        .app-hero h1 {
+            color: white;
+            font-size: 2rem;
+            line-height: 1.15;
+            margin: 0 0 0.45rem 0;
+            letter-spacing: 0;
+        }
+
+        .app-hero p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+            max-width: 920px;
+            font-size: 0.98rem;
+        }
+
+        .hero-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+            margin-top: 0.85rem;
+        }
+
+        .hero-chip {
+            border: 1px solid rgba(255, 255, 255, 0.36);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-radius: 999px;
+            padding: 0.28rem 0.65rem;
+            font-size: 0.82rem;
+            font-weight: 650;
+        }
+
+        h2, h3 {
+            letter-spacing: 0;
+            color: #102A43;
+        }
+
+        div[data-testid="stMetric"] {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-left: 4px solid var(--teal);
+            border-radius: 10px;
+            padding: 0.8rem 0.95rem;
+            box-shadow: 0 10px 26px rgba(16, 42, 67, 0.08);
+        }
+
+        div[data-testid="stMetricLabel"] p {
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        div[data-testid="stMetricValue"] {
+            color: var(--ink);
+            font-weight: 800;
+        }
+
+        button[kind="primary"], div.stButton > button, div[data-testid="stDownloadButton"] button {
+            border-radius: 8px;
+            border: 1px solid rgba(15, 118, 110, 0.25);
+            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 10px 22px rgba(15, 118, 110, 0.18);
+        }
+
+        div.stButton > button:hover, div[data-testid="stDownloadButton"] button:hover {
+            border-color: rgba(37, 99, 235, 0.55);
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.20);
+        }
+
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 0.35rem;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            background: #FFFFFF;
+            border: 1px solid var(--line);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            padding: 0.45rem 0.85rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .stTabs [aria-selected="true"] {
+            background: var(--soft-teal);
+            color: var(--teal-dark);
+            border-color: rgba(15, 118, 110, 0.32);
+        }
+
+        div[data-testid="stDataFrame"] {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 22px rgba(16, 42, 67, 0.06);
+        }
+
+        div[data-testid="stPlotlyChart"] {
+            background: #FFFFFF;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 0.35rem;
+            box-shadow: 0 8px 22px rgba(16, 42, 67, 0.06);
+        }
+
+        div[data-baseweb="input"] > div, div[data-baseweb="select"] > div, textarea {
+            border-radius: 8px;
+            border-color: var(--line);
+        }
+
+        div[data-testid="stSlider"] {
+            background: rgba(255, 255, 255, 0.55);
+            border-radius: 10px;
+            padding: 0.35rem 0.55rem 0.15rem 0.55rem;
+        }
+
+        div[data-testid="stExpander"] {
+            background: #FFFFFF;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 0 8px 22px rgba(16, 42, 67, 0.05);
+        }
+
+        .cap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+            gap: 0.8rem;
+            margin: 0.7rem 0 1rem 0;
+        }
+
+        .cap-card {
+            background: #FFFFFF;
+            border: 1px solid var(--line);
+            border-top: 4px solid var(--teal);
+            border-radius: 10px;
+            padding: 0.95rem;
+            box-shadow: 0 12px 28px rgba(16, 42, 67, 0.08);
+            min-height: 148px;
+        }
+
+        .cap-icon {
+            width: 2.1rem;
+            height: 2.1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: var(--soft-blue);
+            color: var(--blue);
+            font-weight: 900;
+            margin-bottom: 0.55rem;
+        }
+
+        .cap-card h4 {
+            margin: 0 0 0.35rem 0;
+            color: #102A43;
+            font-size: 1rem;
+        }
+
+        .cap-card p {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin: 0;
+            line-height: 1.42;
+        }
+
+        .stAlert {
+            border-radius: 10px;
+            border: 1px solid rgba(15, 118, 110, 0.2);
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_app_header() -> None:
+    st.markdown(
+        """
+        <div class="app-hero">
+            <h1>European Financial Risk, Regulatory, and Governance Platform</h1>
+            <p>Explore synthetic banking data from ingestion to credit risk, IFRS 9, capital, liquidity, financial crime, model risk, operational resilience, climate risk, XVA, and governance evidence.</p>
+            <div class="hero-chips">
+                <span class="hero-chip">Risk analytics</span>
+                <span class="hero-chip">Regulatory reporting</span>
+                <span class="hero-chip">Governance controls</span>
+                <span class="hero-chip">Study guide</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+inject_custom_style()
+px.defaults.template = "plotly_white"
+px.defaults.color_discrete_sequence = ["#0F766E", "#2563EB", "#B7791F", "#B42318", "#4C6FFF", "#64748B"]
+
+
 @st.cache_data
 def load_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     return load_customers(), load_loans(), load_transactions(), load_financials()
@@ -61,7 +320,8 @@ portfolio_pd = float(loans["pd"].fillna(loans["pd"].median()).mean())
 portfolio_lgd = float(loans["lgd"].mean())
 portfolio_ead = float(loans["ead"].sum())
 
-st.sidebar.title("Risk Platform")
+st.sidebar.markdown("### Risk Platform")
+st.sidebar.caption("Scenario controls and navigation")
 DOCS_PAGE = "Documentation & Study Guide"
 MAIN_PAGES = [
     "Executive Overview",
@@ -130,8 +390,7 @@ quality_table, quality_score = run_quality_checks(loans_raw, customers)
 fraud_scored = alert_queue(transactions, 0.35)
 aml_scored = aml_alerts(transactions)
 
-st.title("European Financial Risk, Regulatory, and Governance Platform")
-st.caption("Independent educational portfolio project using synthetic data and simplified regulatory approximations.")
+render_app_header()
 
 
 def metrics_row(items: list[tuple[str, str]]) -> None:
@@ -190,18 +449,18 @@ FIELD_DEFINITIONS = {
 
 
 CAPABILITY_MAP = [
-    ("Credit risk", "PD/LGD/EAD, expected loss, top-risk loans, reason codes, model development lab."),
-    ("IFRS 9", "Stage 1/2/3 logic, 12-month vs lifetime ECL, scenario-weighted ECL, provision bridge."),
-    ("Capital and regulation", "Basel capital ratios, IRB approximation, CRR3 output floor, COREP-style metrics."),
-    ("Stress testing", "Macro shock, reverse stress, geopolitical loss channels, CET1 sensitivity."),
-    ("Liquidity", "LCR, NSFR, leverage, and simple compliance interpretation."),
-    ("Financial crime", "Fraud alert scoring, AML indicators, threshold tuning, alert downloads."),
-    ("Forecasting", "12-month balance, provision, income, and alert trend forecasting."),
-    ("Governance", "BCBS 239 data quality, reconciliation, lineage, audit logging, issue workflow."),
-    ("Model risk", "Validation findings, drift, calibration, confusion matrix, monitoring concepts."),
-    ("EU AI Act and DORA", "AI control assessment, fairness gap, ICT incident classification, resilience checks."),
-    ("Climate and XVA", "Climate-adjusted credit risk and counterparty exposure valuation adjustments."),
-    ("Study guide", "Definitions, formulas, memory hooks, interactive learning, and end-to-end case studies."),
+    ("CR", "Credit risk", "PD/LGD/EAD, expected loss, top-risk loans, reason codes, model development lab."),
+    ("E9", "IFRS 9", "Stage 1/2/3 logic, 12-month vs lifetime ECL, scenario-weighted ECL, provision bridge."),
+    ("BC", "Capital and regulation", "Basel capital ratios, IRB approximation, CRR3 output floor, COREP-style metrics."),
+    ("ST", "Stress testing", "Macro shock, reverse stress, geopolitical loss channels, CET1 sensitivity."),
+    ("LQ", "Liquidity", "LCR, NSFR, leverage, and simple compliance interpretation."),
+    ("FC", "Financial crime", "Fraud alert scoring, AML indicators, threshold tuning, alert downloads."),
+    ("FR", "Forecasting", "12-month balance, provision, income, and alert trend forecasting."),
+    ("GV", "Governance", "BCBS 239 data quality, reconciliation, lineage, audit logging, issue workflow."),
+    ("MR", "Model risk", "Validation findings, drift, calibration, confusion matrix, monitoring concepts."),
+    ("AI", "EU AI Act and DORA", "AI control assessment, fairness gap, ICT incident classification, resilience checks."),
+    ("CX", "Climate and XVA", "Climate-adjusted credit risk and counterparty exposure valuation adjustments."),
+    ("SG", "Study guide", "Definitions, formulas, memory hooks, interactive learning, and end-to-end case studies."),
 ]
 
 
@@ -505,8 +764,19 @@ if page == "Executive Overview":
 
     with capability_tab:
         st.write("Use this view as a map of what the platform can help you understand, test, and explain.")
-        capability_frame = pd.DataFrame(CAPABILITY_MAP, columns=["area", "what_you_can_learn_or_test"])
-        st.dataframe(capability_frame, width="stretch", hide_index=True)
+        capability_cards = "\n".join(
+            f"""
+            <div class="cap-card">
+                <div class="cap-icon">{icon}</div>
+                <h4>{area}</h4>
+                <p>{description}</p>
+            </div>
+            """
+            for icon, area, description in CAPABILITY_MAP
+        )
+        st.markdown(f'<div class="cap-grid">{capability_cards}</div>', unsafe_allow_html=True)
+        capability_frame = pd.DataFrame(CAPABILITY_MAP, columns=["icon", "area", "what_you_can_learn_or_test"])
+        st.dataframe(capability_frame[["area", "what_you_can_learn_or_test"]], width="stretch", hide_index=True)
         learn_a, learn_b, learn_c = st.columns(3)
         with learn_a:
             st.subheader("Risk Calculations")
