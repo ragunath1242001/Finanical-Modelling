@@ -787,8 +787,6 @@ if page == "Executive Overview":
     with capability_tab:
         st.write("Use this view as a map of what the platform can help you understand, test, and explain.")
         render_capability_cards()
-        capability_frame = pd.DataFrame(CAPABILITY_MAP, columns=["icon", "area", "what_you_can_learn_or_test"])
-        st.dataframe(capability_frame[["area", "what_you_can_learn_or_test"]], width="stretch", hide_index=True)
         learn_a, learn_b, learn_c = st.columns(3)
         with learn_a:
             st.subheader("Risk Calculations")
