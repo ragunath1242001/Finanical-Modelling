@@ -1076,6 +1076,60 @@ def study_guide_summary() -> pd.DataFrame:
     )
 
 
+def case_study_report_sections(result: dict[str, float | str], steps: pd.DataFrame) -> dict[str, str]:
+    provision_increase = float(result["provision_increase"])
+    operational_loss = float(result["operational_loss"])
+    data_overlay = float(result["data_quality_overlay"])
+    cet1_change = float(result["cet1_ratio_change_bps"])
+    direction = "falls" if cet1_change < 0 else "improves"
+    return {
+        "Executive Summary": (
+            f"This case study explains: {result['description']}\n\n"
+            f"The scenario starts from baseline ECL of EUR {result['baseline_ecl']:,.0f} and produces stressed ECL of EUR {result['stressed_ecl']:,.0f}. "
+            f"After overlays and operational loss, the case reduces profit to EUR {result['post_profit']:,.0f} and moves the CET1 ratio from "
+            f"{result['opening_cet1_ratio']:.2%} to {result['post_cet1_ratio']:.2%}."
+        ),
+        "Scenario Narrative": (
+            "The case should be read as an end-to-end risk story, not as an isolated formula. "
+            "A trigger first changes borrower risk, model confidence, data quality, or operational resilience. "
+            "That trigger then flows into credit parameters, accounting provisions, profit, regulatory capital, reporting controls, and management action."
+        ),
+        "Transmission Path": (
+            f"- Trigger: {result['case']}\n"
+            "- Credit risk: PD and/or LGD assumptions are stressed, which increases expected credit loss.\n"
+            f"- Accounting impact: provision increase is EUR {provision_increase:,.0f}.\n"
+            f"- Governance overlay: data/model/control overlay is EUR {data_overlay:,.0f}.\n"
+            f"- Operational impact: operational loss is EUR {operational_loss:,.0f}.\n"
+            f"- Capital impact: CET1 ratio {direction} by {cet1_change:,.0f} bps.\n"
+            "- Governance response: assign an owner, document evidence, review assumptions, and track remediation."
+        ),
+        "How To Interpret The Numbers": (
+            "Baseline ECL is the starting expected loss from the current portfolio. Stressed ECL is the expected loss after the case assumptions are applied. "
+            "The provision increase is the extra accounting loss the bank would need to recognize under this simplified case. "
+            "The post-profit figure shows how provisions and operational losses reduce earnings. "
+            "The post-CET1 ratio shows how the loss could pressure regulatory capital."
+        ),
+        "Management And Governance Response": (
+            "A good answer should not stop at the calculation. The response should include management actions and control evidence. "
+            "Examples include tightening lending appetite, reviewing collections strategy, adding a model or data overlay, validating assumptions, "
+            "opening a BCBS 239 or model-risk issue, updating the capital plan, and documenting an audit trail."
+        ),
+        "Learning Points": (
+            "- Risk events move through multiple teams: credit risk, finance, capital, reporting, model risk, operations, and governance.\n"
+            "- ECL is not only a model output; it affects provisions, profit, retained earnings, CET1, and management decisions.\n"
+            "- Data quality, model drift, and operational resilience can be as important as borrower-level PD and LGD changes.\n"
+            "- A strong explanation connects trigger -> calculation -> business impact -> control response."
+        ),
+        "How To Explain This In An Interview Or Review": (
+            "I would explain the case as an end-to-end risk chain. First, I identify the trigger and why it matters. "
+            "Second, I explain which assumptions change, such as PD, LGD, data overlay, or operational loss. "
+            "Third, I quantify how ECL, profit, CET1, and reporting outputs move. "
+            "Finally, I describe the governance response: ownership, validation, remediation, evidence, and management action."
+        ),
+        "Step-by-Step Flow": "\n".join(f"- {row.step}: {row.explanation}" for row in steps.itertuples(index=False)),
+    }
+
+
 def render_case_study_mode(loans: pd.DataFrame | None, cet1: float, rwa_amount: float) -> None:
     st.write("Use these guided cases to practice connecting risk, finance, capital, reporting, and governance end to end.")
     if loans is None or loans.empty:
@@ -1084,12 +1138,17 @@ def render_case_study_mode(loans: pd.DataFrame | None, cet1: float, rwa_amount: 
     case_name = st.selectbox("Guided scenario", list(CASE_STUDIES), key="docs_case_study")
     result = run_case_study(loans, case_name, cet1, rwa_amount)
     steps = case_study_steps(result)
+    report_sections = case_study_report_sections(result, steps)
     cols = st.columns(4)
     cols[0].metric("Baseline ECL", f"EUR {result['baseline_ecl']:,.0f}")
     cols[1].metric("Provision increase", f"EUR {result['provision_increase']:,.0f}")
     cols[2].metric("Post-CET1 ratio", f"{result['post_cet1_ratio']:.2%}")
     cols[3].metric("CET1 change", f"{result['cet1_ratio_change_bps']:,.0f} bps")
     st.info(str(result["description"]))
+    st.subheader("Detailed Case Study Report")
+    for heading, body in report_sections.items():
+        with st.expander(heading, expanded=heading == "Executive Summary"):
+            st.write(body)
     flow = pd.DataFrame(
         {
             "stage": ["Macro/control trigger", "PD/LGD impact", "IFRS 9 ECL", "Profit", "CET1", "COREP ratio", "Governance"],
@@ -1124,11 +1183,7 @@ def render_case_study_mode(loans: pd.DataFrame | None, cet1: float, rwa_amount: 
         "Download case study report",
         pdf_report_bytes(
             f"Case Study - {case_name}",
-            {
-                "Scenario": str(result["description"]),
-                "Impact": f"Provision increase: EUR {result['provision_increase']:,.0f}\n\nPost-CET1 ratio: {result['post_cet1_ratio']:.2%}",
-                "Steps": "\n".join(f"- {row.step}: {row.explanation}" for row in steps.itertuples(index=False)),
-            },
+            report_sections,
         ),
         file_name="end_to_end_case_study.pdf",
         mime="application/pdf",
