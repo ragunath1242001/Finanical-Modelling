@@ -703,19 +703,24 @@ def render_study_guide() -> None:
 
     with left:
         search = st.text_input("Search topics", placeholder="Example: IFRS 9, DORA, XVA, CET1")
-        st.caption("Topic tree")
         available_topics: list[str] = []
         for category, topics in STUDY_GUIDE.items():
-            with st.expander(category, expanded=not search):
-                for topic in topics:
-                    name = str(topic["topic"])
-                    if search and search.lower() not in name.lower() and search.lower() not in category.lower():
-                        continue
-                    available_topics.append(name)
-                    st.write(f"- {name}")
+            for topic in topics:
+                name = str(topic["topic"])
+                if search and search.lower() not in name.lower() and search.lower() not in category.lower():
+                    continue
+                available_topics.append(name)
 
-        selected_topic = st.selectbox("Open topic", available_topics or all_topics())
+        selected_topic = st.selectbox("Select topic", available_topics or all_topics())
         category, topic = lookup[selected_topic]
+        st.caption("Topic tree")
+        for category_name, topics in STUDY_GUIDE.items():
+            with st.expander(category_name, expanded=not search):
+                for topic_item in topics:
+                    name = str(topic_item["topic"])
+                    if search and search.lower() not in name.lower() and search.lower() not in category_name.lower():
+                        continue
+                    st.write(f"- {name}")
 
     with right:
         st.caption(category)
