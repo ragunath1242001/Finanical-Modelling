@@ -443,21 +443,20 @@ def banking_101_summary() -> pd.DataFrame:
     )
 
 
-def _topic_report(topic: dict[str, object]) -> str:
-    lines = [f"# Banking 101 - {topic['topic']}", "", f"Area: {topic['area']}", ""]
-    for heading, key in [
-        ("Beginner Meaning", "beginner_meaning"),
-        ("Why It Matters", "why_it_matters"),
-        ("How This Project Uses It", "project_use"),
-        ("Simple Example", "simple_example"),
-    ]:
-        lines.extend([f"## {heading}", ""])
-        lines.extend(f"- {item}" for item in topic[key])  # type: ignore[index]
-        lines.append("")
-    lines.extend(["## Memory Hook", "", str(topic["memory_hook"]), "", "## Self-Check Questions", ""])
-    for question, answer in topic["self_checks"]:  # type: ignore[index]
-        lines.extend([f"Question: {question}", f"Answer: {answer}", ""])
-    return "\n".join(lines)
+def _topic_report_sections(topic: dict[str, object]) -> dict[str, str]:
+    checks = "\n\n".join(
+        f"Question: {question}\nAnswer: {answer}"
+        for question, answer in topic["self_checks"]  # type: ignore[index]
+    )
+    return {
+        "Area": str(topic["area"]),
+        "Beginner Meaning": "\n".join(f"- {item}" for item in topic["beginner_meaning"]),  # type: ignore[index]
+        "Why It Matters": "\n".join(f"- {item}" for item in topic["why_it_matters"]),  # type: ignore[index]
+        "How This Project Uses It": "\n".join(f"- {item}" for item in topic["project_use"]),  # type: ignore[index]
+        "Simple Example": "\n".join(f"- {item}" for item in topic["simple_example"]),  # type: ignore[index]
+        "Memory Hook": str(topic["memory_hook"]),
+        "Self-Check Questions": checks,
+    }
 
 
 def render_banking_101() -> None:
@@ -516,7 +515,7 @@ def render_banking_101() -> None:
 
         st.download_button(
             "Download this topic as PDF",
-            data=pdf_report_bytes(f"Banking 101 - {topic['topic']}", _topic_report(topic)),
+            data=pdf_report_bytes(f"Banking 101 - {topic['topic']}", _topic_report_sections(topic)),
             file_name=f"banking_101_{str(topic['topic']).lower().replace(' ', '_').replace(',', '').replace('/', '_')}.pdf",
             mime="application/pdf",
         )

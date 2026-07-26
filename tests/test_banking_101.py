@@ -1,4 +1,5 @@
-from src.ui.banking_101 import BANKING_101_TOPICS, banking_101_summary
+from src.reporting.downloads import pdf_report_bytes
+from src.ui.banking_101 import BANKING_101_TOPICS, _topic_report_sections, banking_101_summary
 
 
 def test_banking_101_has_beginner_core_topics():
@@ -25,3 +26,10 @@ def test_banking_101_summary_has_one_row_per_topic():
     summary = banking_101_summary()
     assert len(summary) == len(BANKING_101_TOPICS)
     assert set(summary.columns) == {"area", "topic", "why_it_matters"}
+
+
+def test_banking_101_topic_pdf_sections_generate_pdf():
+    topic = BANKING_101_TOPICS[0]
+    sections = _topic_report_sections(topic)
+    data = pdf_report_bytes(f"Banking 101 - {topic['topic']}", sections)
+    assert data.startswith(b"%PDF")
