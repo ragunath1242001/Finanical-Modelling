@@ -8,6 +8,10 @@ I built an independent European Financial Risk, Regulatory, and Governance Platf
 
 When credit risk deteriorates, PD increases. Higher PD increases expected credit loss under IFRS 9. This increases provisions, which reduces profit and retained earnings. Since retained earnings are part of CET1 capital, CET1 can decrease. That reduction then affects capital ratios reported through COREP.
 
+## How did you go deeper than a basic credit risk dashboard?
+
+I added a model development lab and an IFRS 9 scenario ECL engine. The model lab trains a logistic regression baseline and gradient boosting challenger, evaluates AUC, average precision, Brier score, calibration, confusion matrix, feature importance, risk grades, and PSI monitoring. The IFRS 9 engine calculates scenario-weighted ECL, stage migration, lifetime PD approximation, and an ECL bridge.
+
 ## How do PD, LGD, and EAD feed both IFRS 9 and IRB?
 
 IFRS 9 asks what credit losses are expected, so PD, LGD, and EAD drive provisions. IRB asks how much regulatory capital should be held against credit risk. Similar parameters can feed both processes, but the objective and regulatory treatment are different.

@@ -23,8 +23,20 @@ from src.reporting.executive import management_actions
 from src.reporting.finrep import finrep_metrics
 from src.risk.basel import capital_after_provision, capital_ratios, rwa
 from src.risk.climate import climate_adjusted_credit_risk, climate_portfolio_table
+from src.risk.credit_model_lab import (
+    calibration_table,
+    confusion_matrix_frame,
+    feature_importance,
+    model_comparison_table,
+    population_stability_index,
+    prepare_model_frame,
+    roc_curve_frame,
+    score_with_grades,
+    train_credit_models,
+)
 from src.risk.crr3 import crr3_total_rwa, cva_lite_capital, operational_risk_sma, output_floor
 from src.risk.ifrs9 import assign_stage, calculate_ifrs9, expected_credit_loss
+from src.risk.ifrs9_scenario_engine import ecl_bridge, scenario_weighted_ecl, stage_migration_table
 from src.risk.irb import irb_rwa_equivalent, simplified_irb_capital, standardized_rwa
 from src.risk.liquidity import compliance, lcr, leverage_ratio, nsfr
 from src.risk.reverse_stress import required_loss_for_target, reverse_stress_solver
@@ -54,7 +66,9 @@ page = st.sidebar.radio(
     [
         "Executive Overview",
         "Credit Risk",
+        "Credit Risk Model Development Lab",
         "IFRS 9 ECL",
+        "IFRS 9 Scenario ECL Engine",
         "Basel Capital and IRB",
         "CRR3 Basel Final Reforms",
         "COREP/FINREP Reporting",
@@ -104,6 +118,12 @@ def metrics_row(items: list[tuple[str, str]]) -> None:
     cols = st.columns(len(items))
     for col, (label, value) in zip(cols, items):
         col.metric(label, value)
+
+
+@st.cache_data
+def run_credit_model_lab(customers_data: pd.DataFrame, loans_data: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, object]]:
+    frame = prepare_model_frame(customers_data, loans_data)
+    return frame, train_credit_models(frame)
 
 
 if page == "Executive Overview":
@@ -156,6 +176,53 @@ elif page == "Credit Risk":
         "Credit risk combines default likelihood, loss severity, and exposure. I use PD, LGD, and EAD to rank customers and explain risk grades.",
     )
 
+elif page == "Credit Risk Model Development Lab":
+    st.subheader("Credit Risk Model Development Lab")
+    model_frame, model_result = run_credit_model_lab(customers, loans_raw)
+    threshold = st.slider("Default classification threshold", 0.05, 0.95, 0.50, 0.01)
+    comparison = model_comparison_table(model_result, threshold)
+    selected_model_name = st.selectbox("Model", list(model_result["models"].keys()))
+    selected_model = model_result["models"][selected_model_name]
+    metrics = comparison.loc[comparison["model"].eq(selected_model_name)].iloc[0]
+    metrics_row(
+        [
+            ("AUC", f"{metrics['auc']:.3f}"),
+            ("Average precision", f"{metrics['average_precision']:.3f}"),
+            ("Brier score", f"{metrics['brier_score']:.3f}"),
+            ("Recall", f"{metrics['recall']:.1%}"),
+        ]
+    )
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Comparison", "ROC & Calibration", "Confusion Matrix", "Risk Grades", "Monitoring"])
+    with tab1:
+        st.dataframe(comparison, width="stretch")
+        st.plotly_chart(px.bar(feature_importance(selected_model), x="feature", y="importance", title=f"Feature importance: {selected_model_name}"), width="stretch")
+    with tab2:
+        roc = roc_curve_frame(selected_model, model_result["x_test"], model_result["y_test"])
+        cal = calibration_table(selected_model, model_result["x_test"], model_result["y_test"])
+        st.plotly_chart(px.line(roc, x="false_positive_rate", y="true_positive_rate", title="ROC curve"), width="stretch")
+        st.plotly_chart(px.line(cal, x="predicted_pd", y="observed_default_rate", markers=True, title="Calibration: predicted PD vs observed default rate"), width="stretch")
+        st.dataframe(cal, width="stretch")
+    with tab3:
+        st.dataframe(confusion_matrix_frame(selected_model, model_result["x_test"], model_result["y_test"], threshold), width="stretch")
+    with tab4:
+        scored = score_with_grades(selected_model, model_frame)
+        grade_counts = scored["risk_grade"].value_counts().rename_axis("risk_grade").reset_index(name="count")
+        st.plotly_chart(px.bar(grade_counts, x="risk_grade", y="count", title="Risk grade distribution"), width="stretch")
+        st.dataframe(scored[["loan_id", "customer_id", "model_pd", "risk_grade", "default_flag", "credit_score", "debt_to_income", "days_past_due"]].sort_values("model_pd", ascending=False).head(25), width="stretch")
+    with tab5:
+        baseline_scores = selected_model.predict_proba(model_result["x_train"])[:, 1]
+        current_scores = selected_model.predict_proba(model_result["x_test"])[:, 1]
+        psi = population_stability_index(pd.Series(baseline_scores), pd.Series(current_scores))
+        missingness = model_frame[["income", "pd"]].isna().mean().rename("missing_rate").reset_index().rename(columns={"index": "field"})
+        metrics_row([("PD score PSI", f"{psi:.3f}"), ("Monitoring status", "Review" if psi >= 0.1 else "Stable"), ("Training rows", f"{len(model_result['x_train']):,}"), ("Test rows", f"{len(model_result['x_test']):,}")])
+        st.dataframe(missingness, width="stretch")
+    teaching_block(
+        "How is a credit PD model developed and governed?",
+        "Data -> train/test split -> model training -> AUC/calibration/Brier score -> threshold testing -> risk grades -> monitoring.",
+        "A credit model should not only rank risk. It should be calibrated, explainable, monitored, and documented with known limitations.",
+        "This lab shows a realistic model development workflow: baseline model, challenger model, validation metrics, calibration, risk grading, and monitoring evidence.",
+    )
+
 elif page == "IFRS 9 ECL":
     col1, col2, col3 = st.columns(3)
     pd_input = col1.slider("PD", 0.0, 1.0, portfolio_pd, 0.005)
@@ -174,6 +241,58 @@ elif page == "IFRS 9 ECL":
         f"12-month ECL = {pd_input:.4f} x {lgd_input:.4f} x {ead_input:,.0f}; Stage {stage} provision = EUR {calc['provision']:,.0f}",
         "Stage 2 is based on significant increase in credit risk, not only default. Higher provisions reduce profit, retained earnings, and CET1.",
         "IFRS 9 asks what losses are expected. Stage 1 uses 12-month ECL, while Stage 2 and Stage 3 use lifetime ECL in this simplified model.",
+    )
+
+elif page == "IFRS 9 Scenario ECL Engine":
+    st.subheader("IFRS 9 Scenario ECL Engine")
+    st.write("Scenario-weighted ECL with lifetime PD, stage migration, and provision movement analysis.")
+    u1, u2, u3 = st.columns(3)
+    upside_weight = u1.slider("Upside weight", 0.0, 1.0, 0.20, 0.05)
+    baseline_weight = u2.slider("Baseline weight", 0.0, 1.0, 0.55, 0.05)
+    downside_weight = u3.slider("Downside weight", 0.0, 1.0, 0.25, 0.05)
+    total_weight = max(upside_weight + baseline_weight + downside_weight, 0.0001)
+    scenarios = {
+        "Upside": {"weight": upside_weight / total_weight, "pd_multiplier": 0.85, "lgd_multiplier": 0.95},
+        "Baseline": {"weight": baseline_weight / total_weight, "pd_multiplier": 1.00, "lgd_multiplier": 1.00},
+        "Downside": {"weight": downside_weight / total_weight, "pd_multiplier": st.slider("Downside PD multiplier", 1.0, 3.0, 1.65, 0.05), "lgd_multiplier": st.slider("Downside LGD multiplier", 1.0, 2.0, 1.20, 0.05)},
+    }
+    life = st.slider("Remaining life years for Stage 2/3", 1.0, 8.0, 4.0, 0.5)
+    scenario_loans, scenario_summary = scenario_weighted_ecl(loans_raw, scenarios, life)
+    weighted_ecl = float(scenario_loans["weighted_ecl"].sum())
+    baseline_ecl = float(scenario_summary.loc[scenario_summary["scenario"].eq("Baseline"), "scenario_ecl"].iloc[0])
+    migration = stage_migration_table(loans_raw, scenarios["Downside"]["pd_multiplier"])
+    stage_migration_effect = max(0.0, weighted_ecl - baseline_ecl) * 0.35
+    bridge = ecl_bridge(
+        opening_ecl=baseline_ecl,
+        new_lending=baseline_ecl * 0.08,
+        repayments=baseline_ecl * 0.05,
+        stage_migration=stage_migration_effect,
+        macro_overlay=max(0.0, weighted_ecl - baseline_ecl) * 0.65,
+    )
+    metrics_row(
+        [
+            ("Baseline ECL", f"EUR {baseline_ecl:,.0f}"),
+            ("Weighted ECL", f"EUR {weighted_ecl:,.0f}"),
+            ("Overlay increase", f"EUR {max(0.0, weighted_ecl - baseline_ecl):,.0f}"),
+            ("Scenario weights", f"{scenarios['Upside']['weight']:.0%}/{scenarios['Baseline']['weight']:.0%}/{scenarios['Downside']['weight']:.0%}"),
+        ]
+    )
+    tab1, tab2, tab3, tab4 = st.tabs(["Scenario ECL", "Stage Migration", "ECL Bridge", "Loan Detail"])
+    with tab1:
+        st.dataframe(scenario_summary, width="stretch")
+        st.plotly_chart(px.bar(scenario_summary, x="scenario", y="scenario_ecl", color="scenario", title="ECL by macro scenario"), width="stretch")
+    with tab2:
+        st.dataframe(migration, width="stretch")
+    with tab3:
+        st.dataframe(bridge, width="stretch")
+        st.plotly_chart(px.bar(bridge, x="component", y="amount", title="Provision movement bridge"), width="stretch")
+    with tab4:
+        st.dataframe(scenario_loans[["loan_id", "customer_id", "base_stage", "upside_ecl", "baseline_ecl", "downside_ecl", "weighted_ecl"]].sort_values("weighted_ecl", ascending=False).head(30), width="stretch")
+    teaching_block(
+        "How does IFRS 9 use forward-looking scenarios?",
+        "Weighted ECL = Upside ECL x weight + Baseline ECL x weight + Downside ECL x weight.",
+        "IFRS 9 provisions should reflect forward-looking information. Scenario weights make the result more realistic than a single deterministic forecast.",
+        "This engine shows loan-level stage assignment, lifetime PD, macro scenario weighting, stage migration, and an ECL bridge from opening to closing provision.",
     )
 
 elif page == "Basel Capital and IRB":

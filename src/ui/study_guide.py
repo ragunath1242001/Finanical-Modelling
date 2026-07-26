@@ -83,6 +83,81 @@ STUDY_GUIDE: dict[str, list[dict[str, object]]] = {
             ],
             "calculator": "ifrs9",
         },
+        {
+            "topic": "Credit Risk Model Development",
+            "definition": [
+                "Credit risk model development is the process of building, testing, validating, and monitoring a model that estimates borrower default risk.",
+                "Discrimination measures whether the model ranks risky borrowers above safer borrowers. AUC is a common discrimination metric.",
+                "Calibration measures whether predicted PDs match observed default rates.",
+                "A challenger model is compared against a baseline model to test whether it improves performance without adding unacceptable complexity.",
+            ],
+            "project_use": [
+                "The Credit Risk Model Development Lab trains a logistic regression baseline and a gradient boosting challenger model.",
+                "It reports AUC, average precision, Brier score, precision, recall, ROC curve, calibration table, confusion matrix, feature importance, risk grades, and PSI.",
+                "This makes the project deeper because it shows the model lifecycle, not just the final PD formula.",
+            ],
+            "formulas": [
+                "AUC measures ranking power across thresholds.",
+                "Brier Score = mean((Predicted PD - Actual Default)^2)",
+                "Precision = True Positives / (True Positives + False Positives)",
+                "Recall = True Positives / (True Positives + False Negatives)",
+                "PSI = sum((Actual % - Expected %) x ln(Actual % / Expected %))",
+            ],
+            "memory": [
+                "AUC = can the model rank risk?",
+                "Calibration = do predicted PDs match reality?",
+                "Brier = how far are probabilities from outcomes?",
+                "PSI = has the score distribution shifted?",
+            ],
+            "questions": [
+                {
+                    "question": "Why is AUC not enough for a PD model?",
+                    "answer": "AUC measures ranking, but PD models also need calibration. A model can rank borrowers well while still predicting probabilities that are too high or too low.",
+                },
+                {
+                    "question": "Why compare logistic regression with gradient boosting?",
+                    "answer": "Logistic regression is transparent and stable. Gradient boosting can capture nonlinear patterns. Comparing both shows the tradeoff between interpretability and predictive power.",
+                },
+            ],
+            "calculator": "model_metrics",
+        },
+        {
+            "topic": "IFRS 9 Scenario-Weighted ECL",
+            "definition": [
+                "IFRS 9 ECL should include forward-looking information, not only current borrower data.",
+                "Scenario-weighted ECL combines multiple macroeconomic outcomes such as upside, baseline, and downside.",
+                "Lifetime PD estimates default probability over the expected life of an exposure, especially relevant for Stage 2 and Stage 3.",
+                "An ECL bridge explains why provisions moved between two reporting dates.",
+            ],
+            "project_use": [
+                "The IFRS 9 Scenario ECL Engine calculates loan-level ECL under upside, baseline, and downside scenarios.",
+                "It normalizes scenario weights, applies PD/LGD multipliers, approximates lifetime PD, and calculates weighted ECL.",
+                "It also shows stage migration and a provision movement bridge.",
+            ],
+            "formulas": [
+                "Lifetime PD = 1 - (1 - 12-month PD) ^ Remaining Life Years",
+                "Scenario ECL = Scenario PD x Scenario LGD x EAD",
+                "Weighted ECL = sum(Scenario ECL x Scenario Weight)",
+                "Closing ECL = Opening ECL + New Lending - Repayments + Stage Migration + Macro Overlay",
+            ],
+            "memory": [
+                "IFRS 9 is forward-looking.",
+                "Stage 1 uses 12-month ECL.",
+                "Stage 2 and Stage 3 need lifetime ECL.",
+                "Scenario weights turn macro uncertainty into a provision number.",
+            ],
+            "questions": [
+                {
+                    "question": "Why use scenario weights in IFRS 9?",
+                    "answer": "Because expected credit loss should reflect a probability-weighted view of possible future economic outcomes rather than a single forecast.",
+                },
+                {
+                    "question": "What does an ECL bridge explain?",
+                    "answer": "It explains movement from opening ECL to closing ECL through new lending, repayments, stage migration, and macro overlays.",
+                },
+            ],
+            "calculator": "scenario_ecl",
+        },
     ],
     "Basel, Capital and Regulatory Reporting": [
         {
@@ -710,6 +785,30 @@ def _render_calculator(kind: str) -> None:
         rwa_value = exposure * risk_weight
         st.metric("RWA", f"EUR {rwa_value:,.0f}")
         st.metric("CET1 ratio", f"{cet1 / rwa_value:.2%}" if rwa_value else "n/a")
+
+    elif kind == "model_metrics":
+        tp = st.number_input("True positives", min_value=0, value=25, step=1, key="study_model_tp")
+        fp = st.number_input("False positives", min_value=0, value=15, step=1, key="study_model_fp")
+        fn = st.number_input("False negatives", min_value=0, value=10, step=1, key="study_model_fn")
+        predicted_pd = st.slider("Predicted PD", 0.0, 1.0, 0.08, 0.01, key="study_model_pred")
+        actual_default = st.selectbox("Actual outcome", [0, 1], key="study_model_actual")
+        precision = tp / max(tp + fp, 1)
+        recall = tp / max(tp + fn, 1)
+        brier = (predicted_pd - actual_default) ** 2
+        st.metric("Precision", f"{precision:.1%}")
+        st.metric("Recall", f"{recall:.1%}")
+        st.metric("One-observation Brier contribution", f"{brier:.4f}")
+
+    elif kind == "scenario_ecl":
+        upside = st.number_input("Upside ECL", min_value=0.0, value=80_000.0, step=5_000.0, key="study_scen_up")
+        baseline = st.number_input("Baseline ECL", min_value=0.0, value=100_000.0, step=5_000.0, key="study_scen_base")
+        downside = st.number_input("Downside ECL", min_value=0.0, value=165_000.0, step=5_000.0, key="study_scen_down")
+        downside_weight = st.slider("Downside weight", 0.0, 1.0, 0.25, 0.05, key="study_scen_down_w")
+        upside_weight = st.slider("Upside weight", 0.0, 1.0, 0.20, 0.05, key="study_scen_up_w")
+        baseline_weight = max(0.0, 1 - upside_weight - downside_weight)
+        weighted = upside * upside_weight + baseline * baseline_weight + downside * downside_weight
+        st.metric("Baseline weight", f"{baseline_weight:.0%}")
+        st.metric("Weighted ECL", f"EUR {weighted:,.0f}")
 
     elif kind == "reverse_stress":
         rwa_value = st.number_input("RWA", min_value=1.0, value=50_000_000.0, step=1_000_000.0, key="study_rev_rwa")

@@ -12,7 +12,9 @@ The app currently contains these sections:
 
 - Executive Overview
 - Credit Risk
+- Credit Risk Model Development Lab
 - IFRS 9 ECL
+- IFRS 9 Scenario ECL Engine
 - Basel Capital and IRB
 - CRR3 Basel Final Reforms
 - COREP/FINREP Reporting
@@ -51,6 +53,26 @@ Expected Loss = PD x LGD x EAD
 
 The credit risk page lets the user change PD, LGD, and EAD assumptions and see how customer-level and portfolio-level expected loss changes.
 
+### Credit Risk Model Development Lab
+
+The credit model lab is a deeper modelling workflow. It trains a logistic regression baseline and a gradient boosting challenger model on synthetic borrower and loan data.
+
+The lab includes:
+
+- Train/test split
+- AUC
+- Average precision
+- Brier score
+- Precision and recall at a selected threshold
+- ROC curve
+- Calibration table
+- Confusion matrix
+- Feature importance
+- Risk grades
+- PSI-based monitoring check
+
+This is the deepest modelling section of the project. It is meant to show how a PD model can be developed, evaluated, explained, graded, and monitored.
+
 ### IFRS 9 Expected Credit Loss
 
 IFRS 9 requires banks to estimate expected credit losses before losses actually occur. The project uses a simplified staging approach:
@@ -66,6 +88,29 @@ The simplified staging rules are:
 - Stage 1 otherwise.
 
 Stage 1 uses 12-month ECL. Stage 2 and Stage 3 use lifetime ECL in this educational version.
+
+### IFRS 9 Scenario ECL Engine
+
+The IFRS 9 scenario engine adds a more realistic forward-looking provision workflow. It calculates ECL under upside, baseline, and downside scenarios and then combines them using scenario weights.
+
+The engine includes:
+
+- Loan-level stage assignment
+- 12-month PD for Stage 1
+- Lifetime PD approximation for Stage 2 and Stage 3
+- Scenario PD and LGD multipliers
+- Scenario-weighted ECL
+- Stage migration table
+- Provision movement bridge
+
+The simplified weighted ECL formula is:
+
+```text
+Weighted ECL =
+  Upside ECL x Upside Weight
+  + Baseline ECL x Baseline Weight
+  + Downside ECL x Downside Weight
+```
 
 ### Basel Capital
 

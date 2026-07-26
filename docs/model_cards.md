@@ -5,11 +5,22 @@
 - Purpose: Estimate borrower default risk.
 - Inputs: Age, income, credit score, DTI, loan amount, LTV, days past due.
 - Output: Probability of default.
-- Method: Logistic regression baseline, with transparent fallback logic in the app.
+- Method: Logistic regression baseline and gradient boosting challenger model.
 - Limitations: Synthetic data only; not calibrated to a real bank portfolio.
-- Monitoring: AUC, calibration, missingness, and prediction drift.
+- Monitoring: AUC, average precision, Brier score, calibration, missingness, PSI, and prediction drift.
 - Owner: Credit Risk.
 - Validation status: Validated with limitations for educational use.
+
+## IFRS 9 Scenario ECL Engine
+
+- Purpose: Calculate scenario-weighted expected credit loss using forward-looking macro scenarios.
+- Inputs: Loan-level PD, LGD, EAD, stage indicators, scenario weights, PD multipliers, LGD multipliers, remaining life.
+- Output: Scenario ECL, weighted ECL, stage migration table, ECL bridge.
+- Method: Simplified lifetime PD approximation and weighted scenario ECL.
+- Limitations: Not a production IFRS 9 impairment engine; no real macroeconomic model or accounting policy calibration.
+- Monitoring: Stage migration, weighted ECL movement, macro overlay size, provision bridge components.
+- Owner: Credit Risk / Finance.
+- Validation status: Educational scenario engine.
 
 ## Fraud Classifier
 
