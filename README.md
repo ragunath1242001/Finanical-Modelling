@@ -29,7 +29,7 @@ The app currently contains these sections:
 - XVA Counterparty Risk
 - Documentation & Study Guide
 
-Most pages follow the same structure: input assumptions, calculated outputs, charts or tables, a calculation trace, and a plain-English explanation.
+Most pages follow the same structure: input assumptions, calculated outputs, charts or tables, a calculation trace, and an explanation.
 
 The `Documentation & Study Guide` page is built into the app as a revision section with two modes:
 
