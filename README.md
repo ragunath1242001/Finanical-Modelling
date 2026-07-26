@@ -31,11 +31,10 @@ The app currently contains these sections:
 
 Most pages follow the same structure: input assumptions, calculated outputs, charts or tables, a calculation trace, and a plain-English explanation.
 
-The `Documentation & Study Guide` page is built into the app as a revision section with three modes:
+The `Documentation & Study Guide` page is built into the app as a revision section with two modes:
 
 - `Learning mode`: topic tree, definitions, project usage, formulas, memory hooks, practice questions, and interactive mini calculators.
 - `End-to-End case study mode`: guided scenarios such as unemployment shock, IFRS 9 data quality issue, model drift, and DORA incident.
-- `Quiz mode`: topic-based multiple-choice questions with immediate explanations.
 
 The `Credit Risk` and `IFRS 9 ECL` pages include mode selectors for deeper analysis. Credit Risk contains both the portfolio risk view and the model development lab. IFRS 9 contains both the ECL calculator and the scenario ECL engine.
 

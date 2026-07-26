@@ -700,19 +700,16 @@ def _topic_lookup() -> dict[str, tuple[str, dict[str, object]]]:
 
 def render_study_guide(loans: pd.DataFrame | None = None, cet1: float = 8_500_000.0, rwa_amount: float = 50_000_000.0) -> None:
     st.subheader("Documentation & Study Guide")
-    st.write("Use this page as a structured study notebook. Pick a mode, study a topic, practice a case, or test yourself with quizzes.")
+    st.write("Use this page as a structured study notebook. Pick a mode, study a topic, or practice a case study.")
     study_mode = st.radio(
         "Study mode",
-        ["Learning mode", "End-to-End case study mode", "Quiz mode"],
+        ["Learning mode", "End-to-End case study mode"],
         horizontal=True,
         key="study_mode",
     )
 
     if study_mode == "End-to-End case study mode":
         render_case_study_mode(loans, cet1, rwa_amount)
-        return
-    if study_mode == "Quiz mode":
-        render_quiz_mode()
         return
 
     lookup = _topic_lookup()
@@ -893,95 +890,6 @@ def study_guide_summary() -> pd.DataFrame:
     return pd.DataFrame(
         [{"category": category, "topic": topic["topic"]} for category, topics in STUDY_GUIDE.items() for topic in topics]
     )
-
-
-QUIZ_BANK = [
-    {
-        "topic": "PD, LGD, EAD and Expected Loss",
-        "question": "Which formula calculates expected credit loss?",
-        "options": ["PD x LGD x EAD", "CET1 / RWA", "HQLA / Cash Outflows"],
-        "answer": "PD x LGD x EAD",
-        "explanation": "Expected loss combines default likelihood, loss severity, and exposure.",
-    },
-    {
-        "topic": "IFRS 9 ECL and Staging",
-        "question": "What does Stage 2 represent in IFRS 9?",
-        "options": ["Significant increase in credit risk but not defaulted", "No credit risk", "Always defaulted"],
-        "answer": "Significant increase in credit risk but not defaulted",
-        "explanation": "Stage 2 is the SICR stage. It is not the same as default.",
-    },
-    {
-        "topic": "Basel III Capital and RWA",
-        "question": "What is the denominator of the CET1 ratio?",
-        "options": ["Risk-weighted assets", "Total deposits", "Net interest income"],
-        "answer": "Risk-weighted assets",
-        "explanation": "CET1 ratio = CET1 capital / RWA.",
-    },
-    {
-        "topic": "CRR3 and Basel Final Reforms",
-        "question": "When does the output floor bind?",
-        "options": ["When internal-model RWA is below the floor", "When LCR is above 100%", "When fraud alerts increase"],
-        "answer": "When internal-model RWA is below the floor",
-        "explanation": "The output floor creates a lower bound based on standardized RWA.",
-    },
-    {
-        "topic": "BCBS 239 Data Governance",
-        "question": "Why does missing PD matter?",
-        "options": ["It can distort ECL and risk reports", "It only affects UI color", "It improves calibration automatically"],
-        "answer": "It can distort ECL and risk reports",
-        "explanation": "PD feeds ECL, stress testing, capital analysis, and reporting.",
-    },
-    {
-        "topic": "Model Risk Management",
-        "question": "What does calibration check?",
-        "options": ["Whether predicted PDs match observed default rates", "Whether code imports", "Whether assets equal liabilities"],
-        "answer": "Whether predicted PDs match observed default rates",
-        "explanation": "A model can rank well but still produce poorly calibrated probabilities.",
-    },
-    {
-        "topic": "DORA Operational Resilience",
-        "question": "What does RTO mean?",
-        "options": ["Recovery Time Objective", "Risk Transfer Option", "Regulatory Threshold Output"],
-        "answer": "Recovery Time Objective",
-        "explanation": "RTO is the target time within which a service should be recovered.",
-    },
-    {
-        "topic": "XVA Counterparty Risk",
-        "question": "What does CVA mainly capture?",
-        "options": ["Counterparty credit risk", "Loan origination cost", "Deposit liquidity risk"],
-        "answer": "Counterparty credit risk",
-        "explanation": "CVA adjusts derivative value for counterparty default risk on positive exposure.",
-    },
-]
-
-
-def render_quiz_mode() -> None:
-    st.write("Select a topic, answer the questions, then read the explanation. If a topic has no quiz yet, use Learning mode for that topic.")
-    lookup = _topic_lookup()
-    selected_topic = st.selectbox("Select topic", ["All topics"] + all_topics(), key="quiz_topic_select")
-    questions = [item for item in QUIZ_BANK if selected_topic == "All topics" or item["topic"] == selected_topic]
-    if selected_topic != "All topics":
-        category, _ = lookup[selected_topic]
-        st.caption(category)
-    if not questions:
-        st.info("No quiz questions are attached to this topic yet. Use Learning mode for notes and practice questions.")
-        return
-    correct = 0
-    answered = 0
-    quiz_key_topic = selected_topic.lower().replace(" ", "_").replace(",", "").replace("/", "_")
-    for index, item in enumerate(questions, start=1):
-        st.markdown(f"**Q{index}. {item['question']}**")
-        selected = st.radio("Choose one", ["Not answered yet"] + item["options"], key=f"quiz_{quiz_key_topic}_{index}")
-        if selected != "Not answered yet":
-            answered += 1
-            if selected == item["answer"]:
-                correct += 1
-                st.success("Correct")
-            else:
-                st.error(f"Incorrect. Correct answer: {item['answer']}")
-            with st.expander("Explanation"):
-                st.write(item["explanation"])
-    st.metric("Score", f"{correct}/{len(questions)}" if answered else "Not started")
 
 
 def render_case_study_mode(loans: pd.DataFrame | None, cet1: float, rwa_amount: float) -> None:

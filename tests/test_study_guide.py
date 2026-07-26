@@ -1,4 +1,4 @@
-from src.ui.study_guide import QUIZ_BANK, STUDY_GUIDE, all_topics, study_guide_summary
+from src.ui.study_guide import STUDY_GUIDE, all_topics, study_guide_summary
 
 
 def test_study_guide_has_core_topics():
@@ -23,10 +23,3 @@ def test_study_guide_summary_has_one_row_per_topic():
     summary = study_guide_summary()
     assert len(summary) == len(all_topics())
     assert set(summary.columns) == {"category", "topic"}
-
-
-def test_quiz_bank_has_answers_and_explanations():
-    assert QUIZ_BANK
-    for item in QUIZ_BANK:
-        assert item["answer"] in item["options"]
-        assert item["explanation"]
