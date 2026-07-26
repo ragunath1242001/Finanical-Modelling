@@ -88,17 +88,36 @@ def inject_custom_style() -> None:
             background: #FFFFFF;
             border-color: rgba(255, 255, 255, 0.44);
             border-radius: 8px;
+            position: relative;
+            padding-right: 1.8rem;
         }
 
-        section[data-testid="stSidebar"] div[data-baseweb="select"] span,
-        section[data-testid="stSidebar"] div[data-baseweb="select"] input {
+        section[data-testid="stSidebar"] div[data-baseweb="select"] > div::after {
+            content: "";
+            position: absolute;
+            right: 0.85rem;
+            top: 50%;
+            transform: translateY(-35%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid var(--teal);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        section[data-testid="stSidebar"] div[data-baseweb="select"] *,
+        section[data-testid="stSidebar"] div[data-baseweb="select"] [role="combobox"],
+        section[data-testid="stSidebar"] div[data-baseweb="select"] input,
+        section[data-testid="stSidebar"] div[data-baseweb="select"] span {
             color: #102A43 !important;
             -webkit-text-fill-color: #102A43 !important;
         }
 
-        section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+        section[data-testid="stSidebar"] div[data-baseweb="select"] svg,
+        section[data-testid="stSidebar"] div[data-baseweb="select"] svg * {
             color: var(--teal) !important;
             fill: var(--teal) !important;
+            stroke: var(--teal) !important;
         }
 
         section[data-testid="stSidebar"] .stSlider [data-testid="stTickBar"] {
