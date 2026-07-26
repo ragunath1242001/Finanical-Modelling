@@ -61,35 +61,56 @@ portfolio_lgd = float(loans["lgd"].mean())
 portfolio_ead = float(loans["ead"].sum())
 
 st.sidebar.title("Risk Platform")
-page = st.sidebar.radio(
+DOCS_PAGE = "Documentation & Study Guide"
+MAIN_PAGES = [
+    "Executive Overview",
+    "Credit Risk",
+    "Credit Risk Model Development Lab",
+    "IFRS 9 ECL",
+    "IFRS 9 Scenario ECL Engine",
+    "Basel Capital and IRB",
+    "CRR3 Basel Final Reforms",
+    "COREP/FINREP Reporting",
+    "Stress Testing",
+    "Geopolitical Reverse Stress",
+    "Liquidity and Leverage",
+    "Fraud and AML",
+    "Forecasting",
+    "BCBS 239 Governance",
+    "Model Risk Management",
+    "EU AI Act Governance",
+    "DORA Operational Resilience",
+    "ESG Climate Credit Risk",
+    "XVA Counterparty Risk",
+]
+
+if "page" not in st.session_state:
+    st.session_state.page = "Executive Overview"
+
+
+def set_main_page() -> None:
+    st.session_state.page = st.session_state.main_page_select
+
+
+selected_index = MAIN_PAGES.index(st.session_state.page) if st.session_state.page in MAIN_PAGES else 0
+st.sidebar.selectbox(
     "Navigation",
-    [
-        "Executive Overview",
-        "Credit Risk",
-        "Credit Risk Model Development Lab",
-        "IFRS 9 ECL",
-        "IFRS 9 Scenario ECL Engine",
-        "Basel Capital and IRB",
-        "CRR3 Basel Final Reforms",
-        "COREP/FINREP Reporting",
-        "Stress Testing",
-        "Geopolitical Reverse Stress",
-        "Liquidity and Leverage",
-        "Fraud and AML",
-        "Forecasting",
-        "BCBS 239 Governance",
-        "Model Risk Management",
-        "EU AI Act Governance",
-        "DORA Operational Resilience",
-        "ESG Climate Credit Risk",
-        "XVA Counterparty Risk",
-        "Documentation & Study Guide",
-    ],
+    MAIN_PAGES,
+    index=selected_index,
+    key="main_page_select",
+    on_change=set_main_page,
 )
+
+st.sidebar.divider()
 
 pd_shock = st.sidebar.slider("Portfolio PD shock", -20, 100, 0, 5) / 100
 lgd_shock = st.sidebar.slider("Portfolio LGD shock", -20, 80, 0, 5) / 100
 scenario = st.sidebar.selectbox("Scenario", list(SCENARIOS))
+st.sidebar.divider()
+if st.sidebar.button(DOCS_PAGE):
+    st.session_state.page = DOCS_PAGE
+
+page = st.session_state.page
 adjusted_pd = (loans["pd"].fillna(loans["pd"].median()) * (1 + pd_shock)).clip(0, 1)
 adjusted_lgd = (loans["lgd"] * (1 + lgd_shock)).clip(0, 1)
 loans["adjusted_pd"] = adjusted_pd
