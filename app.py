@@ -534,10 +534,10 @@ if page == "Executive Overview":
             mime="application/pdf",
         )
     teaching_block(
-        "How do risk, capital, liquidity, financial crime, and governance connect in one executive view?",
-        "Higher PD/LGD -> higher ECL -> higher provisions -> lower profit and CET1 -> lower COREP capital ratios.",
-        "The dashboard turns model outputs into management decisions: capital planning, liquidity actions, collections, and data remediation.",
-        "I built the platform to show the end-to-end chain from borrower risk to regulatory ratios, governance controls, and executive decisions.",
+        "What data has been loaded, what risk signals does it create, and which parts of the platform can be used for learning or testing?",
+        "Customers + loans + transactions + financial trends -> data quality checks -> ECL, capital, liquidity, fraud/AML, IFRS 9 stage mix, and management actions.",
+        "The overview connects the ingested synthetic datasets to the calculations and modules built on top of them. It shows portfolio size, field coverage, data quality issues, risk indicators, available learning areas, and the reports that can be downloaded.",
+        "Use this page as the project control room: first understand the data, then inspect the risk metrics, then choose the module you want to study, test, or explain in more detail.",
     )
 
 elif page == "Credit Risk":
