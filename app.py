@@ -19,7 +19,7 @@ from src.governance.lod_workflows import issue_queue
 from src.governance.model_risk import model_inventory, validation_findings
 from src.governance.reconciliation import reconcile_exposure
 from src.reporting.corep import corep_metrics
-from src.reporting.downloads import capital_summary_report, dataframe_csv_bytes, markdown_report_bytes, validation_report
+from src.reporting.downloads import capital_summary_report, dataframe_csv_bytes, pdf_report_bytes, validation_report
 from src.reporting.executive import management_actions
 from src.reporting.finrep import finrep_metrics
 from src.risk.basel import capital_after_provision, capital_ratios, rwa
@@ -197,8 +197,8 @@ def render_credit_model_development_lab() -> None:
         st.download_button(
             "Download validation report",
             validation_report(metrics.to_dict(), selected_model_name),
-            file_name="model_validation_summary.md",
-            mime="text/markdown",
+            file_name="model_validation_summary.pdf",
+            mime="application/pdf",
         )
         st.plotly_chart(px.bar(feature_importance(selected_model), x="feature", y="importance", title=f"Feature importance: {selected_model_name}"), width="stretch")
     with tab2:
@@ -345,8 +345,8 @@ if page == "Executive Overview":
         st.download_button(
             "Download capital summary",
             capital_summary_report(ratios["cet1_ratio"], base_rwa, liq_lcr, liq_nsfr),
-            file_name="capital_liquidity_summary.md",
-            mime="text/markdown",
+            file_name="capital_liquidity_summary.pdf",
+            mime="application/pdf",
         )
     teaching_block(
         "How do risk, capital, liquidity, financial crime, and governance connect in one executive view?",
@@ -658,7 +658,7 @@ elif page == "DORA Operational Resilience":
     )
     st.info(str(incident["reporting_action"]))
     st.dataframe(third_party_register(), width="stretch")
-    dora_report = markdown_report_bytes(
+    dora_report = pdf_report_bytes(
         "DORA Incident Assessment",
         {
             "Incident Classification": f"Severity: {incident['severity']}\n\nScore: {incident['incident_score']}\n\nAction: {incident['reporting_action']}",
@@ -666,7 +666,7 @@ elif page == "DORA Operational Resilience":
             "Third Party": f"Third-party provider involved: {incident['third_party_provider']}",
         },
     )
-    st.download_button("Download DORA incident report", dora_report, file_name="dora_incident_report.md", mime="text/markdown")
+    st.download_button("Download DORA incident report", dora_report, file_name="dora_incident_report.pdf", mime="application/pdf")
     if st.button("Log DORA incident assessment"):
         log_event("portfolio-user", "DORA Operational Resilience", "ICT incident classified", "", str(incident["severity"]), str(incident["reporting_action"]))
         st.success("DORA audit event written.")

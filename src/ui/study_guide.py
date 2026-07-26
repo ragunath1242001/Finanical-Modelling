@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.reporting.downloads import markdown_report_bytes
+from src.reporting.downloads import pdf_report_bytes
 from src.risk.case_studies import CASE_STUDIES, case_study_steps, run_case_study
 
 
@@ -938,7 +938,7 @@ def render_case_study_mode(loans: pd.DataFrame | None, cet1: float, rwa_amount: 
     st.dataframe(steps, use_container_width=True)
     st.download_button(
         "Download case study report",
-        markdown_report_bytes(
+        pdf_report_bytes(
             f"Case Study - {case_name}",
             {
                 "Scenario": str(result["description"]),
@@ -946,6 +946,6 @@ def render_case_study_mode(loans: pd.DataFrame | None, cet1: float, rwa_amount: 
                 "Steps": "\n".join(f"- {row.step}: {row.explanation}" for row in steps.itertuples(index=False)),
             },
         ),
-        file_name="end_to_end_case_study.md",
-        mime="text/markdown",
+        file_name="end_to_end_case_study.pdf",
+        mime="application/pdf",
     )

@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.reporting.downloads import capital_summary_report, dataframe_csv_bytes, markdown_report_bytes, validation_report
+from src.reporting.downloads import capital_summary_report, dataframe_csv_bytes, pdf_report_bytes, validation_report
 
 
 def test_dataframe_csv_bytes():
@@ -8,10 +8,10 @@ def test_dataframe_csv_bytes():
     assert b"a,b" in data
 
 
-def test_markdown_report_bytes():
-    data = markdown_report_bytes("Title", {"Section": "Body"})
-    assert b"# Title" in data
-    assert b"## Section" in data
+def test_pdf_report_bytes():
+    data = pdf_report_bytes("Title", {"Section": "Body"})
+    assert data.startswith(b"%PDF")
+    assert len(data) > 100
 
 
 def test_summary_reports_return_bytes():

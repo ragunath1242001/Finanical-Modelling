@@ -396,4 +396,3 @@ This is an independent educational project using synthetic data. It should not b
 - Add downloadable DORA incident and third-party oversight reports.
 - Add persistent scenario storage for comparing multiple stress runs.
 - Add more topic-specific exercises to the in-app documentation page.
-- Add PDF formatting for downloadable reports.
