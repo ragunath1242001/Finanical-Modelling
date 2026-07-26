@@ -28,8 +28,11 @@ The app currently contains these sections:
 - ESG Climate Credit Risk
 - XVA Counterparty Risk
 - Interview Mode
+- Documentation & Study Guide
 
 Most pages follow the same structure: input assumptions, calculated outputs, charts or tables, a calculation trace, and a plain-English explanation.
+
+The `Documentation & Study Guide` page is built into the app as a revision section. It organizes the main topics in a tree structure and includes definitions, how the project uses each concept, formulas, memory hooks, self-test questions with answers, and small interactive calculators for selected topics.
 
 ## Main Concepts
 
@@ -341,3 +344,4 @@ This is an independent educational project using synthetic data. It should not b
 - Add richer climate scenario assumptions by sector and geography.
 - Add downloadable DORA incident and third-party oversight reports.
 - Add persistent scenario storage for comparing multiple stress runs.
+- Add more topic-specific exercises to the in-app documentation page.

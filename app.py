@@ -31,6 +31,7 @@ from src.risk.reverse_stress import required_loss_for_target, reverse_stress_sol
 from src.risk.stress_testing import SCENARIOS, stress_ecl
 from src.risk.xva import xva_summary
 from src.ui.components import teaching_block
+from src.ui.study_guide import render_study_guide
 
 
 st.set_page_config(page_title="European Financial Risk Platform", layout="wide")
@@ -69,6 +70,7 @@ page = st.sidebar.radio(
         "ESG Climate Credit Risk",
         "XVA Counterparty Risk",
         "Interview Mode",
+        "Documentation & Study Guide",
     ],
 )
 
@@ -531,7 +533,7 @@ elif page == "XVA Counterparty Risk":
         "I can explain XVA at a portfolio level: derivatives create future exposure, collateral reduces exposure, counterparty PD/LGD drive CVA, and funding/margin costs affect valuation.",
     )
 
-else:
+elif page == "Interview Mode":
     st.subheader("Interview Mode")
     narratives = {
         "Tell me about this project.": "I built an independent European Financial Risk, Regulatory, and Governance Platform to understand how risk analytics, regulatory reporting, data governance, and model governance connect in financial institutions.",
@@ -544,4 +546,7 @@ else:
     question = st.selectbox("Interview question", list(narratives))
     st.info(narratives[question])
     st.warning("Truthfulness rule: describe this as an independent educational portfolio project, not production work for an employer unless that is factually true.")
+
+else:
+    render_study_guide()
 
