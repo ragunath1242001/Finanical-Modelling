@@ -690,6 +690,190 @@ STUDY_GUIDE: dict[str, list[dict[str, object]]] = {
 }
 
 
+EXTENDED_MEANING: dict[str, list[str]] = {
+    "PD, LGD, EAD and Expected Loss": [
+        "Why we need it: PD, LGD, and EAD separate credit loss into likelihood, severity, and exposure. This helps a risk analyst explain whether a loss estimate is driven by borrower weakness, weak collateral/recovery, or exposure size.",
+        "Comparison: expected loss is a normal-course loss estimate, while unexpected loss is the additional volatility capital is meant to absorb. IFRS 9 focuses on expected credit loss; Basel capital focuses more on resilience against unexpected loss.",
+        "Preferred direction: lower PD, lower LGD, and controlled EAD are better, but there is no universal 'good' PD because it depends on product, segment, collateral, vintage, and macro conditions.",
+        "Industry use: PD is often monitored by rating grade or score band, LGD by secured/unsecured product and collateral type, and EAD by outstanding balance, utilization, and credit conversion assumptions.",
+        "Caution: never compare PDs from two models unless you understand the definition of default, observation window, calibration date, and population. A 12-month PD, lifetime PD, point-in-time PD, and through-the-cycle PD are not the same thing.",
+        "Caution: expected loss can hide concentration risk. Many small exposures with moderate PD may look manageable, while one large single-name exposure can still create severe tail risk.",
+    ],
+    "IFRS 9 ECL and Staging": [
+        "Why we need it: IFRS 9 makes banks recognize credit deterioration earlier instead of waiting until default. This improves transparency but requires judgment around significant increase in credit risk.",
+        "Comparison: Stage 1 uses 12-month ECL because the asset is still performing. Stage 2 uses lifetime ECL because credit risk has increased significantly. Stage 3 also uses lifetime ECL but represents defaulted or credit-impaired exposure.",
+        "Preferred direction: a stable book should have most exposures in Stage 1, controlled Stage 2 migration, and low Stage 3/default levels. There is no single perfect stage mix because it depends on portfolio risk appetite and economic cycle.",
+        "Common trigger logic: 30 days past due is often used as a Stage 2 backstop and 90 days past due as a default/Stage 3 backstop, but banks also use internal rating deterioration, forbearance, watchlist flags, and macro overlays.",
+        "Caution: Stage 2 is not default. It means risk has increased significantly since origination. Confusing Stage 2 with default is a common interview and reporting mistake.",
+        "Caution: ECL is sensitive to macro assumptions and overlays. A model-only number may need expert adjustment, but overlays must be justified, governed, and documented.",
+    ],
+    "Credit Risk Model Development": [
+        "Why we need it: credit models convert borrower and account data into repeatable risk estimates that support underwriting, pricing, monitoring, collections, provisioning, and capital analysis.",
+        "Comparison: logistic regression is transparent and easy to explain; tree-based models can capture nonlinear patterns but are harder to govern. A stronger AUC does not automatically mean the challenger should replace the baseline.",
+        "Preferred direction: higher AUC and average precision are better for ranking, lower Brier score is better for probability accuracy, and calibration should show predicted PDs close to observed default rates by band.",
+        "Industry practice: models are usually developed with train/test splits, out-of-time validation, calibration checks, stability monitoring, challenger comparison, documentation, and independent validation.",
+        "Caution: a model can rank well but be poorly calibrated. For PD models, calibration matters because the output is used as a probability, not just a score.",
+        "Caution: avoid leakage. Variables created after default or after the decision point can make a model look excellent in testing but unusable in production.",
+    ],
+    "IFRS 9 Scenario-Weighted ECL": [
+        "Why we need it: IFRS 9 requires forward-looking information, so provisions should reflect possible future macro outcomes instead of only current borrower status.",
+        "Comparison: a single baseline forecast is easier to explain, but scenario weighting captures uncertainty. Upside, baseline, and downside scenarios help show how ECL changes under different economic paths.",
+        "Preferred direction: scenario weights should be plausible, internally approved, and consistent with finance/economic assumptions. A baseline scenario often receives the highest weight, but weights should change when downside risk increases.",
+        "Industry practice: banks usually reconcile scenario ECL movement through bridges such as model updates, exposure changes, repayments, stage migration, macro overlay, and management adjustment.",
+        "Caution: downside scenarios can dominate ECL even with modest probability if losses are severe. Always inspect scenario contribution, not just final weighted ECL.",
+        "Caution: scenario weights should not be adjusted only to reach a desired provision number. Governance should evidence why assumptions changed.",
+    ],
+    "Basel III Capital and RWA": [
+        "Why we need it: capital protects depositors, creditors, and the financial system by giving banks a buffer against losses. RWA makes capital requirements risk-sensitive.",
+        "Comparison: total assets measure balance sheet size, while RWA measures risk-weighted exposure. Two banks with the same assets can have very different capital needs.",
+        "Regulatory anchor: Basel minimums include CET1, Tier 1, total capital, leverage, and buffers. Banks usually manage above minimums because supervisors, markets, and internal risk appetite expect headroom.",
+        "Preferred direction: higher capital ratios and stronger CET1 quality are better, but too much idle capital may reduce return on equity. Risk management is about adequate resilience, not maximizing one ratio blindly.",
+        "Caution: a high CET1 ratio can fall because capital decreases, RWA increases, or both. Always explain numerator and denominator movement separately.",
+        "Caution: simplified RWA examples are useful for learning, but production capital calculations include exposure class, collateral, credit conversion factors, maturity, guarantees, netting, and regulatory adjustments.",
+    ],
+    "IRB versus Standardized Approach": [
+        "Why we need it: standardized rules improve comparability, while IRB allows approved banks to use internal risk estimates. Both approaches translate credit risk into capital requirements.",
+        "Comparison: standardized approach is simpler and more comparable; IRB is more risk-sensitive but requires stronger data, validation, governance, and supervisory approval.",
+        "Preferred direction: IRB models should be accurate, conservative where needed, stable, explainable, and independently validated. Lower RWA is not automatically better if it comes from weak assumptions.",
+        "Industry practice: IRB frameworks require default definitions, rating systems, PD/LGD/EAD estimation, downturn adjustments, overrides, validation, backtesting, and model change control.",
+        "Caution: IFRS 9 PD and IRB PD are related but not interchangeable. IFRS 9 is accounting ECL; IRB is regulatory capital.",
+        "Caution: the output floor under final Basel reforms limits excessive benefit from internal models, so capital planning must compare internal and standardized outcomes.",
+    ],
+    "CRR3 and Basel Final Reforms": [
+        "Why we need it: CRR3 implements final Basel III reforms in the EU and aims to reduce excessive variability in risk-weighted assets across banks.",
+        "Comparison: before output floors, internal models could produce much lower RWA than standardized approaches. The output floor creates a standardized lower bound.",
+        "Preferred direction: banks should understand whether their capital constraint comes from internal-model RWA, standardized RWA, output floor, operational risk, CVA, or leverage.",
+        "Industry focus: capital teams often monitor phase-in effects, business-line RWA impacts, model constraints, standardized approach sensitivity, and management actions.",
+        "Caution: CRR3 impact is not just a formula problem. It affects pricing, portfolio steering, model strategy, capital planning, and regulatory reporting.",
+        "Caution: a simplified output floor is useful for learning, but real implementation depends on exposure classes, transitional rules, reporting templates, and supervisory interpretation.",
+    ],
+    "COREP and FINREP": [
+        "Why we need it: COREP and FINREP convert risk and finance data into structured regulatory reporting. They force consistency between accounting numbers, exposure data, capital, and risk measures.",
+        "Comparison: FINREP is closer to financial statements; COREP is closer to prudential capital and leverage reporting. Both must reconcile because accounting profit and provisions affect regulatory capital.",
+        "Preferred direction: reports should be complete, accurate, reconciled, explainable, timely, and traceable to source systems.",
+        "Industry practice: reporting teams use controls, reconciliations, validation rules, sign-offs, variance analysis, and audit evidence before submission.",
+        "Caution: reconciliation differences are not automatically errors, but they must be explainable. Timing, scope, accounting treatment, and risk definitions can create valid differences.",
+        "Caution: regulatory reporting is high-control work. A correct formula is not enough without lineage, ownership, review, and evidence.",
+    ],
+    "Stress Testing": [
+        "Why we need it: stress testing asks whether the bank can survive adverse but plausible conditions and what management actions would be needed.",
+        "Comparison: forecasting asks what is likely; stress testing asks what happens if conditions worsen; reverse stress testing asks what would break the bank.",
+        "Preferred direction: a useful stress is severe enough to challenge the portfolio but plausible enough to support management decisions.",
+        "Industry practice: stress tests connect macro variables to PD, LGD, income, provisions, RWA, capital, liquidity, and management actions.",
+        "Caution: stress results are only as good as the transmission logic. A macro story must connect clearly to borrower risk, collateral values, funding, and capital.",
+        "Caution: do not only present final losses. Explain which assumptions drive the result and whether the bank breaches risk appetite or regulatory buffers.",
+    ],
+    "Geopolitical Reverse Stress Testing": [
+        "Why we need it: reverse stress testing starts from failure or near-failure and identifies the combination of shocks that could cause it. This helps reveal hidden vulnerabilities.",
+        "Comparison: normal stress testing starts with a scenario and calculates impact; reverse stress starts with a target breach and works backward to required shocks.",
+        "Preferred direction: scenarios should be specific, credible, and linked to transmission channels such as credit losses, market losses, funding cost, operational disruption, cyber impact, and sanctions exposure.",
+        "Industry use: reverse stress is often used for risk appetite, recovery planning, board discussion, and challenging whether existing controls are enough.",
+        "Caution: reverse stress should not be treated as prediction. It is a resilience exercise that asks what combination of events would be dangerous.",
+        "Caution: avoid vague scenarios. 'Geopolitical risk increases' is weak; 'sanctions disrupt SME exporters, funding spreads widen, and cyber downtime delays collections' is stronger.",
+    ],
+    "Liquidity, LCR, NSFR and Leverage": [
+        "Why we need it: banks can fail from liquidity stress even if their capital ratios appear acceptable. Liquidity metrics test whether cash and stable funding are enough.",
+        "Comparison: LCR is short-term liquidity resilience over a 30-day stress period; NSFR is longer-term stable funding; leverage ratio is a non-risk-weighted solvency backstop.",
+        "Regulatory anchor: LCR and NSFR are commonly managed at or above 100%, while leverage ratio is monitored as a backstop. Banks usually hold internal buffers above minimums.",
+        "Preferred direction: higher LCR and NSFR are safer, but very high liquidity can reduce profitability. The goal is sufficient resilience within risk appetite.",
+        "Caution: LCR can change quickly during deposit outflows or market stress. Daily liquidity management matters more than a single static ratio.",
+        "Caution: risk-weighted capital ratios and leverage ratio can tell different stories. A low-risk portfolio may look strong on RWA but still be constrained by leverage exposure.",
+    ],
+    "Forecasting": [
+        "Why we need it: forecasting creates a base view of future balances, income, provisions, and alerts so teams can plan capital, liquidity, budget, staffing, and risk appetite.",
+        "Comparison: a forecast is expected-path planning; a stress test is adverse-path resilience; a scenario is a structured alternative future.",
+        "Preferred direction: forecasts should be explainable, regularly updated, backtested, and presented with uncertainty ranges rather than false precision.",
+        "Industry practice: banks compare forecast output against actuals, track forecast error, challenge assumptions, and align forecasts with finance and risk planning cycles.",
+        "Caution: extrapolating recent trends can fail around turning points. Economic shocks, policy changes, seasonality, and portfolio mix shifts can break simple trends.",
+        "Caution: a forecast should not be treated as a promise. It is an assumption set that needs monitoring and challenge.",
+    ],
+    "Fraud Detection": [
+        "Why we need it: fraud detection protects customers and the institution by identifying suspicious transactions quickly enough to prevent or limit loss.",
+        "Comparison: fraud models focus on unauthorized or abusive activity; AML monitoring focuses on suspicious financial crime behavior, money laundering, sanctions, and regulatory investigation.",
+        "Preferred direction: high recall is important when missing fraud is costly, but precision matters because too many false positives overwhelm investigators and damage customer experience.",
+        "Industry practice: thresholds are tuned by alert capacity, loss tolerance, customer friction, typology, channel, and investigation outcomes.",
+        "Caution: accuracy is often misleading because fraud is rare. Precision, recall, false positive rate, alert volume, and loss capture are more useful.",
+        "Caution: fraud patterns drift quickly. Rules and models need monitoring, feedback loops, and periodic recalibration.",
+    ],
+    "AML Transaction Monitoring": [
+        "Why we need it: AML monitoring helps identify suspicious activity that may indicate money laundering, terrorist financing, sanctions evasion, or other financial crime.",
+        "Comparison: fraud often protects the customer or bank from direct loss; AML protects the financial system and meets legal/regulatory obligations.",
+        "Preferred direction: the goal is not zero alerts. The goal is a risk-based alert population that investigators can review, escalate, document, and close with evidence.",
+        "Industry practice: AML scenarios often include high-risk jurisdictions, structuring, rapid movement of funds, unusual volume, customer risk, sanctions exposure, and typology-specific rules.",
+        "Caution: false positives are common, but unexplained alert suppression is dangerous. Threshold changes need governance and evidence.",
+        "Caution: transaction monitoring should be linked to customer due diligence. A transaction that is normal for one customer may be unusual for another.",
+    ],
+    "XVA Counterparty Risk": [
+        "Why we need it: derivatives create future counterparty exposure, funding costs, and collateral costs. XVA adjusts valuation to include these effects.",
+        "Comparison: CVA reflects counterparty default risk, DVA reflects own default risk, FVA reflects funding costs, and MVA reflects margin funding costs.",
+        "Preferred direction: stronger counterparties, lower exposure, better netting, higher collateral coverage, and shorter maturity generally reduce CVA.",
+        "Industry practice: production XVA uses exposure simulation, netting sets, collateral agreements, discounting, credit curves, wrong-way risk analysis, and market data.",
+        "Caution: simplified CVA = exposure x PD x LGD is useful for intuition but does not replace Monte Carlo exposure profiles or legal netting/collateral treatment.",
+        "Caution: collateral reduces exposure, but margining creates operational and funding considerations. Lower CVA does not mean no counterparty risk.",
+    ],
+    "BCBS 239 Data Governance": [
+        "Why we need it: risk decisions and regulatory reports are only reliable if the data is accurate, complete, timely, consistent, and traceable.",
+        "Comparison: data quality checks find problems; lineage explains where data came from; reconciliation explains differences; governance assigns ownership and evidence.",
+        "Preferred direction: high data quality score, low unresolved issues, clear owners, timely remediation, and traceable metrics from source to report.",
+        "Industry practice: key controls cover completeness, validity, uniqueness, timeliness, reconciliation, lineage, change management, and issue escalation.",
+        "Caution: data issues can create model issues. Missing PD, invalid exposure, stale records, or duplicate IDs can distort ECL, capital, and management decisions.",
+        "Caution: manual fixes without audit trail can be worse than the original issue. Remediation should be documented and reviewable.",
+    ],
+    "Model Risk Management": [
+        "Why we need it: models influence decisions, provisions, capital, pricing, and controls. Model risk management reduces the chance that bad models or misuse cause losses or poor decisions.",
+        "Comparison: model development builds the model; validation independently challenges it; monitoring checks whether it remains fit after deployment.",
+        "Preferred direction: models should have clear purpose, strong data, documented assumptions, validation evidence, explainability, monitoring thresholds, and accountable owners.",
+        "Industry practice: model inventories track owner, use, tier, status, validation date, findings, limitations, implementation status, and monitoring results.",
+        "Caution: a model can be technically strong but unsuitable for its use case. Fit-for-purpose matters more than leaderboard performance.",
+        "Caution: model limitations are not a weakness if they are known, documented, controlled, and considered in decisions.",
+    ],
+    "EU AI Act Governance": [
+        "Why we need it: AI governance ensures automated systems are documented, explainable, monitored, and controlled, especially when they affect important customer outcomes such as credit access.",
+        "Comparison: model risk management focuses on model lifecycle risk; AI governance adds stronger emphasis on transparency, human oversight, data governance, logging, fairness, and user impact.",
+        "Preferred direction: high-risk AI should have evidence of risk management, data quality, documentation, explainability, human oversight, robustness, monitoring, and incident handling.",
+        "Industry practice: teams map AI use cases, classify risk tier, assign owners, maintain documentation, test fairness, monitor drift, and evidence human oversight.",
+        "Caution: explainability is not only a technical chart. It must be understandable to the intended audience and useful for challenge or decision review.",
+        "Caution: fairness gaps need context. A difference in approval rates may be explainable or problematic, but it should be investigated rather than ignored.",
+    ],
+    "DORA Operational Resilience": [
+        "Why we need it: DORA focuses on whether financial entities can withstand, respond to, and recover from ICT disruption without harming critical services.",
+        "Comparison: traditional operational risk often records losses and incidents; operational resilience asks whether important business services can remain within tolerance during disruption.",
+        "Preferred direction: recovery time should be within RTO, data loss should be within RPO, critical third parties should be tested, and exit plans should exist for important outsourced services.",
+        "Industry practice: DORA work includes ICT risk registers, incident classification, resilience testing, third-party oversight, threat-led penetration testing, and management reporting.",
+        "Caution: outsourcing does not outsource accountability. A bank remains responsible for critical services delivered by a third-party provider.",
+        "Caution: a recovery plan that is not tested is weak evidence. Resilience requires exercises, lessons learned, remediation, and senior ownership.",
+    ],
+    "ESG and Climate Credit Risk": [
+        "Why we need it: climate risk can weaken borrowers, reduce collateral values, disrupt operations, and create sector concentration risk. It becomes financial risk through PD, LGD, and EAD.",
+        "Comparison: transition risk comes from policy, technology, market, and carbon-price changes; physical risk comes from acute events or chronic climate changes affecting assets and operations.",
+        "Preferred direction: lower sector sensitivity, lower physical risk exposure, better collateral resilience, and stronger borrower transition plans reduce climate credit risk.",
+        "Industry practice: climate credit analysis often uses sector heatmaps, physical location risk, scenario analysis, emissions intensity, transition plans, and portfolio concentration views.",
+        "Caution: climate data is often incomplete or estimated. Assumptions should be transparent and sensitivity-tested.",
+        "Caution: climate risk horizons can be longer than normal credit risk horizons, so short-term default data may not capture the full risk.",
+    ],
+    "1LOD and 2LOD Workflow": [
+        "Why we need it: clear ownership prevents governance gaps. 1LOD manages the risk, 2LOD challenges and oversees, and audit provides independent assurance.",
+        "Comparison: 1LOD is responsible for day-to-day controls and remediation; 2LOD sets frameworks, monitors, challenges, and escalates; audit independently reviews whether the framework works.",
+        "Preferred direction: issues should have clear owner, severity, due date, root cause, remediation action, evidence, challenge status, and closure approval.",
+        "Industry practice: workflows often track issue lifecycle from identification to impact assessment, action plan, remediation, validation, closure, and audit trail.",
+        "Caution: 2LOD should not become the owner of 1LOD remediation, otherwise independent challenge becomes weaker.",
+        "Caution: a control without evidence is hard to defend. Governance work must leave a trace.",
+    ],
+}
+
+
+def _apply_extended_meaning() -> None:
+    for topics in STUDY_GUIDE.values():
+        for topic in topics:
+            additions = EXTENDED_MEANING.get(str(topic["topic"]), [])
+            definition = topic["definition"]
+            if additions and isinstance(definition, list) and not any(str(item).startswith("Why we need it:") for item in definition):
+                definition.extend(additions)
+
+
+_apply_extended_meaning()
+
+
 def all_topics() -> list[str]:
     return [topic["topic"] for topics in STUDY_GUIDE.values() for topic in topics]
 
