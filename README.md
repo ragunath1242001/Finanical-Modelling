@@ -76,7 +76,7 @@ The app keeps most calculation logic under `src/` and uses `app.py` mainly as th
 
 ## Role-Based Learning Paths
 
-The Executive Overview includes role-based paths for common job families:
+The Banking 101 section includes role-based paths for common job families:
 
 - `Credit Risk Analyst`: Banking 101, borrower-level expected loss, model development, IFRS 9, stress testing, and study guide questions.
 - `Model Risk Analyst`: model development metrics, validation, drift, monitoring, explainability, fairness, data quality, and governance evidence.

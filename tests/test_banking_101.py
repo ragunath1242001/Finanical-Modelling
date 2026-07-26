@@ -1,5 +1,5 @@
 from src.reporting.downloads import pdf_report_bytes
-from src.ui.banking_101 import BANKING_101_TOPICS, _topic_report_sections, banking_101_summary
+from src.ui.banking_101 import BANKING_101_TOPICS, ROLE_LEARNING_PATHS, _topic_report_sections, banking_101_summary
 
 
 def test_banking_101_has_beginner_core_topics():
@@ -33,3 +33,10 @@ def test_banking_101_topic_pdf_sections_generate_pdf():
     sections = _topic_report_sections(topic)
     data = pdf_report_bytes(f"Banking 101 - {topic['topic']}", sections)
     assert data.startswith(b"%PDF")
+
+
+def test_banking_101_has_role_learning_paths():
+    assert "Credit Risk Analyst" in ROLE_LEARNING_PATHS
+    assert "Model Risk Analyst" in ROLE_LEARNING_PATHS
+    assert "Regulatory Reporting Analyst" in ROLE_LEARNING_PATHS
+    assert all(steps for steps in ROLE_LEARNING_PATHS.values())

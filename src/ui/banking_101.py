@@ -430,6 +430,42 @@ BANKING_101_TOPICS: list[dict[str, object]] = [
 ]
 
 
+ROLE_LEARNING_PATHS = {
+    "Credit Risk Analyst": [
+        "Banking 101: What a bank does, loans, collateral, LTV, PD/LGD/EAD.",
+        "Credit Risk: inspect borrower-level expected loss and reason codes.",
+        "Credit Risk Model Development Lab: compare baseline and challenger PD models.",
+        "IFRS 9 ECL: connect borrower deterioration to staging and provisions.",
+        "Stress Testing: explain how macro shocks raise PD, LGD, ECL, and capital pressure.",
+        "Documentation & Study Guide: revise credit risk formulas and self-check questions.",
+    ],
+    "Model Risk Analyst": [
+        "Banking 101: understand why banks use models and where model outputs affect decisions.",
+        "Credit Risk Model Development Lab: review AUC, calibration, Brier score, threshold, and PSI.",
+        "Model Risk Management: inspect inventory, validation findings, drift, and monitoring evidence.",
+        "EU AI Act Governance: review explainability, fairness gap, human oversight, and control evidence.",
+        "BCBS 239 Governance: connect data quality problems to model reliability.",
+        "Documentation & Study Guide: revise model risk, validation, calibration, and governance topics.",
+    ],
+    "Regulatory Reporting Analyst": [
+        "Banking 101: learn balance sheet, provisions, capital, liquidity, and regulatory purpose.",
+        "IFRS 9 ECL: understand provision movement and profit impact.",
+        "Basel Capital and IRB: learn CET1, RWA, capital ratios, and simplified IRB comparison.",
+        "CRR3 Basel Final Reforms: review output floor, operational risk SMA, and CVA-lite.",
+        "COREP/FINREP Reporting: connect capital and financial reporting views.",
+        "BCBS 239 Governance: check completeness, accuracy, consistency, timeliness, and traceability.",
+    ],
+    "Operational Resilience / Governance Analyst": [
+        "Banking 101: learn why banks need controls, resilience, and reliable reporting.",
+        "BCBS 239 Governance: review data quality, lineage, reconciliation, and issue workflow.",
+        "DORA Operational Resilience: classify ICT incidents and assess third-party resilience.",
+        "EU AI Act Governance: review AI controls and post-deployment monitoring.",
+        "Fraud and AML: understand alert thresholds, false positives, and suspicious activity review.",
+        "Documentation & Study Guide: use case studies to connect incidents to management actions.",
+    ],
+}
+
+
 def banking_101_summary() -> pd.DataFrame:
     return pd.DataFrame(
         [
@@ -467,7 +503,7 @@ def render_banking_101() -> None:
     )
 
     summary = banking_101_summary()
-    overview_tab, learn_tab, path_tab = st.tabs(["Overview", "Learn Topic", "Beginner Path"])
+    overview_tab, learn_tab, path_tab, role_tab = st.tabs(["Overview", "Learn Topic", "Beginner Path", "Role Paths"])
 
     with overview_tab:
         st.write("Use this as a beginner map before going into the detailed risk modules.")
@@ -539,3 +575,12 @@ def render_banking_101() -> None:
             with st.container(border=True):
                 st.markdown(f"#### Step {step}: {title}")
                 st.write(description)
+
+    with role_tab:
+        st.write("Use these paths when preparing for specific job families. Each path starts with the beginner layer and then moves into the relevant risk modules.")
+        selected_role = st.selectbox("Select role path", list(ROLE_LEARNING_PATHS))
+        for step_number, step in enumerate(ROLE_LEARNING_PATHS[selected_role], start=1):
+            with st.container(border=True):
+                st.markdown(f"#### Step {step_number}")
+                st.write(step)
+        st.info("Tip: after finishing a path, use the Documentation & Study Guide case studies to explain the full chain from data to risk output to management action.")
