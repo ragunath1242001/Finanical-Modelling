@@ -80,8 +80,19 @@ def inject_custom_style() -> None:
             border-right: 1px solid rgba(255, 255, 255, 0.18);
         }
 
-        section[data-testid="stSidebar"] * {
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3,
+        section[data-testid="stSidebar"] h4,
+        section[data-testid="stSidebar"] label,
+        section[data-testid="stSidebar"] p,
+        section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
+        section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
             color: #F8FAFC !important;
+        }
+
+        section[data-testid="stSidebar"] [data-testid="stSelectbox"] {
+            position: relative;
         }
 
         section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
@@ -115,9 +126,11 @@ def inject_custom_style() -> None:
 
         section[data-testid="stSidebar"] div[data-baseweb="select"] svg,
         section[data-testid="stSidebar"] div[data-baseweb="select"] svg * {
-            color: var(--teal) !important;
-            fill: var(--teal) !important;
-            stroke: var(--teal) !important;
+            color: #0F766E !important;
+            fill: #0F766E !important;
+            stroke: #0F766E !important;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
 
         section[data-testid="stSidebar"] .stSlider [data-testid="stTickBar"] {
