@@ -27,7 +27,6 @@ The app currently contains these sections:
 - DORA Operational Resilience
 - ESG Climate Credit Risk
 - XVA Counterparty Risk
-- Interview Mode
 - Documentation & Study Guide
 
 Most pages follow the same structure: input assumptions, calculated outputs, charts or tables, a calculation trace, and a plain-English explanation.

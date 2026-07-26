@@ -69,7 +69,6 @@ page = st.sidebar.radio(
         "DORA Operational Resilience",
         "ESG Climate Credit Risk",
         "XVA Counterparty Risk",
-        "Interview Mode",
         "Documentation & Study Guide",
     ],
 )
@@ -532,20 +531,6 @@ elif page == "XVA Counterparty Risk":
         "XVA connects derivative valuation with counterparty credit risk, collateral, funding spreads, and model validation.",
         "I can explain XVA at a portfolio level: derivatives create future exposure, collateral reduces exposure, counterparty PD/LGD drive CVA, and funding/margin costs affect valuation.",
     )
-
-elif page == "Interview Mode":
-    st.subheader("Interview Mode")
-    narratives = {
-        "Tell me about this project.": "I built an independent European Financial Risk, Regulatory, and Governance Platform to understand how risk analytics, regulatory reporting, data governance, and model governance connect in financial institutions.",
-        "How does IFRS 9 connect to Basel III?": "When PD rises, IFRS 9 ECL and provisions rise. Provisions reduce profit and retained earnings, which can reduce CET1 capital and therefore COREP capital ratios.",
-        "How do PD, LGD, and EAD feed both IFRS 9 and IRB?": "IFRS 9 uses PD, LGD, and EAD to estimate expected credit losses. IRB uses related risk parameters to determine regulatory capital needs, serving a different objective.",
-        "Why is BCBS 239 important?": "Risk calculations are only reliable when source data is accurate, complete, timely, consistent, and traceable.",
-        "What is the role of 1LOD and 2LOD?": "1LOD owns and manages risk in operations. 2LOD provides independent oversight, challenge, monitoring, and guidance.",
-        "How is this related to BFSI data governance experience?": "BFSI data governance experience helps explain why quality, lineage, reconciliation, and auditability matter; this project independently extends that foundation into risk and regulatory concepts.",
-    }
-    question = st.selectbox("Interview question", list(narratives))
-    st.info(narratives[question])
-    st.warning("Truthfulness rule: describe this as an independent educational portfolio project, not production work for an employer unless that is factually true.")
 
 else:
     render_study_guide()
