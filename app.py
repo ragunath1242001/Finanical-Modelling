@@ -85,9 +85,20 @@ def inject_custom_style() -> None:
         }
 
         section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.28);
+            background: #FFFFFF;
+            border-color: rgba(255, 255, 255, 0.44);
             border-radius: 8px;
+        }
+
+        section[data-testid="stSidebar"] div[data-baseweb="select"] span,
+        section[data-testid="stSidebar"] div[data-baseweb="select"] input {
+            color: #102A43 !important;
+            -webkit-text-fill-color: #102A43 !important;
+        }
+
+        section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+            color: var(--teal) !important;
+            fill: var(--teal) !important;
         }
 
         section[data-testid="stSidebar"] .stSlider [data-testid="stTickBar"] {
@@ -302,6 +313,17 @@ def render_app_header() -> None:
         """,
         unsafe_allow_html=True,
     )
+
+
+def render_capability_cards() -> None:
+    for row_start in range(0, len(CAPABILITY_MAP), 3):
+        columns = st.columns(3)
+        for column, capability in zip(columns, CAPABILITY_MAP[row_start : row_start + 3]):
+            icon, area, description = capability
+            with column:
+                with st.container(border=True):
+                    st.markdown(f"#### `{icon}` {area}")
+                    st.write(description)
 
 
 inject_custom_style()
@@ -764,17 +786,7 @@ if page == "Executive Overview":
 
     with capability_tab:
         st.write("Use this view as a map of what the platform can help you understand, test, and explain.")
-        capability_cards = "\n".join(
-            f"""
-            <div class="cap-card">
-                <div class="cap-icon">{icon}</div>
-                <h4>{area}</h4>
-                <p>{description}</p>
-            </div>
-            """
-            for icon, area, description in CAPABILITY_MAP
-        )
-        st.markdown(f'<div class="cap-grid">{capability_cards}</div>', unsafe_allow_html=True)
+        render_capability_cards()
         capability_frame = pd.DataFrame(CAPABILITY_MAP, columns=["icon", "area", "what_you_can_learn_or_test"])
         st.dataframe(capability_frame[["area", "what_you_can_learn_or_test"]], width="stretch", hide_index=True)
         learn_a, learn_b, learn_c = st.columns(3)
