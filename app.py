@@ -19,9 +19,11 @@ from src.governance.lod_workflows import issue_queue
 from src.governance.model_risk import model_inventory, validation_findings
 from src.governance.reconciliation import reconcile_exposure
 from src.reporting.corep import corep_metrics
+from src.reporting.downloads import capital_summary_report, dataframe_csv_bytes, markdown_report_bytes, validation_report
 from src.reporting.executive import management_actions
 from src.reporting.finrep import finrep_metrics
 from src.risk.basel import capital_after_provision, capital_ratios, rwa
+from src.risk.case_studies import CASE_STUDIES, case_study_steps, run_case_study
 from src.risk.climate import climate_adjusted_credit_risk, climate_portfolio_table
 from src.risk.credit_model_lab import (
     calibration_table,
@@ -64,6 +66,7 @@ st.sidebar.title("Risk Platform")
 DOCS_PAGE = "Documentation & Study Guide"
 MAIN_PAGES = [
     "Executive Overview",
+    "End-to-End Risk Case Study",
     "Credit Risk",
     "IFRS 9 ECL",
     "Basel Capital and IRB",
@@ -187,6 +190,18 @@ def render_credit_model_development_lab() -> None:
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["Comparison", "ROC & Calibration", "Confusion Matrix", "Risk Grades", "Monitoring"])
     with tab1:
         st.dataframe(comparison, width="stretch")
+        st.download_button(
+            "Download model comparison CSV",
+            dataframe_csv_bytes(comparison),
+            file_name="model_comparison.csv",
+            mime="text/csv",
+        )
+        st.download_button(
+            "Download validation report",
+            validation_report(metrics.to_dict(), selected_model_name),
+            file_name="model_validation_summary.md",
+            mime="text/markdown",
+        )
         st.plotly_chart(px.bar(feature_importance(selected_model), x="feature", y="importance", title=f"Feature importance: {selected_model_name}"), width="stretch")
     with tab2:
         roc = roc_curve_frame(selected_model, model_result["x_test"], model_result["y_test"])
@@ -274,11 +289,23 @@ def render_ifrs9_scenario_ecl_engine() -> None:
     tab1, tab2, tab3, tab4 = st.tabs(["Scenario ECL", "Stage Migration", "ECL Bridge", "Loan Detail"])
     with tab1:
         st.dataframe(scenario_summary, width="stretch")
+        st.download_button(
+            "Download IFRS 9 scenario ECL CSV",
+            dataframe_csv_bytes(scenario_summary),
+            file_name="ifrs9_scenario_ecl.csv",
+            mime="text/csv",
+        )
         st.plotly_chart(px.bar(scenario_summary, x="scenario", y="scenario_ecl", color="scenario", title="ECL by macro scenario"), width="stretch")
     with tab2:
         st.dataframe(migration, width="stretch")
     with tab3:
         st.dataframe(bridge, width="stretch")
+        st.download_button(
+            "Download ECL bridge CSV",
+            dataframe_csv_bytes(bridge),
+            file_name="ifrs9_ecl_bridge.csv",
+            mime="text/csv",
+        )
         st.plotly_chart(px.bar(bridge, x="component", y="amount", title="Provision movement bridge"), width="stretch")
     with tab4:
         st.dataframe(scenario_loans[["loan_id", "customer_id", "base_stage", "upside_ecl", "baseline_ecl", "downside_ecl", "weighted_ecl"]].sort_values("weighted_ecl", ascending=False).head(30), width="stretch")
@@ -291,6 +318,8 @@ def render_ifrs9_scenario_ecl_engine() -> None:
 
 
 if page == "Executive Overview":
+    st.subheader("Executive Risk Dashboard")
+    st.write("A single view of portfolio risk, capital, liquidity, financial crime, governance, and model health indicators.")
     metrics_row(
         [
             ("Portfolio ECL", f"EUR {portfolio_ecl:,.0f}"),
@@ -308,14 +337,88 @@ if page == "Executive Overview":
         ]
     )
     st.plotly_chart(px.histogram(loans, x="expected_loss", nbins=45, title="Expected loss distribution"), width="stretch")
-    st.write("Management actions")
-    for action in management_actions(ratios["cet1_ratio"], liq_lcr, liq_nsfr, quality_score):
-        st.write(f"- {action}")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.subheader("Management Actions")
+        for action in management_actions(ratios["cet1_ratio"], liq_lcr, liq_nsfr, quality_score):
+            st.write(f"- {action}")
+    with col_b:
+        st.subheader("Download")
+        st.download_button(
+            "Download capital summary",
+            capital_summary_report(ratios["cet1_ratio"], base_rwa, liq_lcr, liq_nsfr),
+            file_name="capital_liquidity_summary.md",
+            mime="text/markdown",
+        )
     teaching_block(
         "How do risk, capital, liquidity, financial crime, and governance connect in one executive view?",
         "Higher PD/LGD -> higher ECL -> higher provisions -> lower profit and CET1 -> lower COREP capital ratios.",
         "The dashboard turns model outputs into management decisions: capital planning, liquidity actions, collections, and data remediation.",
         "I built the platform to show the end-to-end chain from borrower risk to regulatory ratios, governance controls, and executive decisions.",
+    )
+
+elif page == "End-to-End Risk Case Study":
+    st.subheader("End-to-End Risk Case Study")
+    case_name = st.selectbox("Guided scenario", list(CASE_STUDIES))
+    result = run_case_study(loans_raw, case_name, base_cet1, base_rwa)
+    steps = case_study_steps(result)
+    metrics_row(
+        [
+            ("Baseline ECL", f"EUR {result['baseline_ecl']:,.0f}"),
+            ("Provision increase", f"EUR {result['provision_increase']:,.0f}"),
+            ("Post-CET1 ratio", f"{result['post_cet1_ratio']:.2%}"),
+            ("CET1 change", f"{result['cet1_ratio_change_bps']:,.0f} bps"),
+        ]
+    )
+    st.info(str(result["description"]))
+    flow = pd.DataFrame(
+        {
+            "stage": ["Macro/control trigger", "PD/LGD impact", "IFRS 9 ECL", "Profit", "CET1", "COREP ratio", "Governance"],
+            "value": [
+                str(result["case"]),
+                "Risk parameters deteriorate",
+                f"EUR {result['stressed_ecl']:,.0f}",
+                f"EUR {result['post_profit']:,.0f}",
+                f"EUR {result['post_cet1']:,.0f}",
+                f"{result['post_cet1_ratio']:.2%}",
+                "Issue owner, remediation, audit evidence",
+            ],
+        }
+    )
+    st.dataframe(flow, width="stretch")
+    st.plotly_chart(
+        px.bar(
+            pd.DataFrame(
+                {
+                    "component": ["Provision increase", "Data quality overlay", "Operational loss"],
+                    "amount": [result["provision_increase"], result["data_quality_overlay"], result["operational_loss"]],
+                }
+            ),
+            x="component",
+            y="amount",
+            title="Loss and overlay components",
+        ),
+        width="stretch",
+    )
+    st.dataframe(steps, width="stretch")
+    st.download_button(
+        "Download case study report",
+        markdown_report_bytes(
+            f"Case Study - {case_name}",
+            {
+                "Scenario": str(result["description"]),
+                "Impact": f"Provision increase: EUR {result['provision_increase']:,.0f}\n\nPost-CET1 ratio: {result['post_cet1_ratio']:.2%}",
+                "Steps": "\n".join(f"- {row.step}: {row.explanation}" for row in steps.itertuples(index=False)),
+            },
+        ),
+        file_name="end_to_end_case_study.md",
+        mime="text/markdown",
+    )
+    teaching_block(
+        "How does one event flow across risk, finance, capital, and governance?",
+        "Macro/control trigger -> PD/LGD impact -> ECL increase -> profit reduction -> CET1 decrease -> COREP ratio impact -> governance action.",
+        "A real risk platform should connect calculations to decisions, controls, owners, and evidence.",
+        "Use this page to practice explaining the full chain rather than isolated formulas.",
     )
 
 elif page == "Credit Risk":
@@ -524,6 +627,12 @@ elif page == "Forecasting":
 elif page == "BCBS 239 Governance":
     metrics_row([("Data quality score", f"{quality_score:.1f}%"), ("Failed controls", f"{int(quality_table['status'].eq('Fail').sum())}"), ("Open reconciliation", "Yes"), ("Audit events", f"{len(read_events()):,}")])
     st.dataframe(quality_table, width="stretch")
+    st.download_button(
+        "Download BCBS 239 issue log",
+        dataframe_csv_bytes(quality_table),
+        file_name="bcbs239_issue_log.csv",
+        mime="text/csv",
+    )
     st.write("Lineage")
     st.write(" -> ".join(LINEAGE_STEPS))
     st.dataframe(reconcile_exposure(portfolio_ead, portfolio_ead * 1.012), width="stretch")
@@ -615,6 +724,15 @@ elif page == "DORA Operational Resilience":
     )
     st.info(str(incident["reporting_action"]))
     st.dataframe(third_party_register(), width="stretch")
+    dora_report = markdown_report_bytes(
+        "DORA Incident Assessment",
+        {
+            "Incident Classification": f"Severity: {incident['severity']}\n\nScore: {incident['incident_score']}\n\nAction: {incident['reporting_action']}",
+            "Resilience": f"Score: {resilience['resilience_score']:.0f}/100\n\nStatus: {resilience['status']}",
+            "Third Party": f"Third-party provider involved: {incident['third_party_provider']}",
+        },
+    )
+    st.download_button("Download DORA incident report", dora_report, file_name="dora_incident_report.md", mime="text/markdown")
     if st.button("Log DORA incident assessment"):
         log_event("portfolio-user", "DORA Operational Resilience", "ICT incident classified", "", str(incident["severity"]), str(incident["reporting_action"]))
         st.success("DORA audit event written.")
