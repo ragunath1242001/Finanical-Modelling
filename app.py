@@ -43,6 +43,7 @@ from src.risk.liquidity import compliance, lcr, leverage_ratio, nsfr
 from src.risk.reverse_stress import required_loss_for_target, reverse_stress_solver
 from src.risk.stress_testing import SCENARIOS, stress_ecl
 from src.risk.xva import xva_summary
+from src.ui.banking_101 import render_banking_101
 from src.ui.components import teaching_block
 from src.ui.study_guide import render_study_guide
 
@@ -377,6 +378,7 @@ portfolio_ead = float(loans["ead"].sum())
 st.sidebar.markdown("### Risk Platform")
 st.sidebar.caption("Scenario controls and navigation")
 DOCS_PAGE = "Documentation & Study Guide"
+BANKING_101_PAGE = "Banking 101"
 MAIN_PAGES = [
     "Executive Overview",
     "Credit Risk",
@@ -422,6 +424,8 @@ scenario = st.sidebar.selectbox("Scenario", list(SCENARIOS))
 st.sidebar.divider()
 if st.sidebar.button(DOCS_PAGE):
     st.session_state.page = DOCS_PAGE
+if st.sidebar.button(BANKING_101_PAGE):
+    st.session_state.page = BANKING_101_PAGE
 
 page = st.session_state.page
 adjusted_pd = (loans["pd"].fillna(loans["pd"].median()) * (1 + pd_shock)).clip(0, 1)
@@ -1237,6 +1241,8 @@ elif page == "XVA Counterparty Risk":
         "I can explain XVA at a portfolio level: derivatives create future exposure, collateral reduces exposure, counterparty PD/LGD drive CVA, and funding/margin costs affect valuation.",
     )
 
-else:
+elif page == DOCS_PAGE:
     render_study_guide(loans_raw, base_cet1, base_rwa)
+else:
+    render_banking_101()
 
