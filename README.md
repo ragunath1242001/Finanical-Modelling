@@ -12,9 +12,7 @@ The app currently contains these sections:
 
 - Executive Overview
 - Credit Risk
-- Credit Risk Model Development Lab
 - IFRS 9 ECL
-- IFRS 9 Scenario ECL Engine
 - Basel Capital and IRB
 - CRR3 Basel Final Reforms
 - COREP/FINREP Reporting
@@ -34,6 +32,8 @@ The app currently contains these sections:
 Most pages follow the same structure: input assumptions, calculated outputs, charts or tables, a calculation trace, and a plain-English explanation.
 
 The `Documentation & Study Guide` page is built into the app as a revision section. It organizes the main topics in a tree structure and includes definitions, how the project uses each concept, formulas, memory hooks, self-test questions with answers, and small interactive calculators for selected topics.
+
+The `Credit Risk` and `IFRS 9 ECL` pages include mode selectors for deeper analysis. Credit Risk contains both the portfolio risk view and the model development lab. IFRS 9 contains both the ECL calculator and the scenario ECL engine.
 
 ## Main Concepts
 

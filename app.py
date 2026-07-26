@@ -65,9 +65,7 @@ DOCS_PAGE = "Documentation & Study Guide"
 MAIN_PAGES = [
     "Executive Overview",
     "Credit Risk",
-    "Credit Risk Model Development Lab",
     "IFRS 9 ECL",
-    "IFRS 9 Scenario ECL Engine",
     "Basel Capital and IRB",
     "CRR3 Basel Final Reforms",
     "COREP/FINREP Reporting",
@@ -147,35 +145,7 @@ def run_credit_model_lab(customers_data: pd.DataFrame, loans_data: pd.DataFrame)
     return frame, train_credit_models(frame)
 
 
-if page == "Executive Overview":
-    metrics_row(
-        [
-            ("Portfolio ECL", f"EUR {portfolio_ecl:,.0f}"),
-            ("Stressed CET1 ratio", f"{ratios['cet1_ratio']:.2%}"),
-            ("RWA", f"EUR {base_rwa:,.0f}"),
-            ("Data quality score", f"{quality_score:.1f}%"),
-        ]
-    )
-    metrics_row(
-        [
-            ("LCR", f"{liq_lcr:.1%}"),
-            ("NSFR", f"{liq_nsfr:.1%}"),
-            ("Fraud alerts", f"{int(fraud_scored['risk_label'].eq('Alert').sum()):,}"),
-            ("AML high alerts", f"{int(aml_scored['investigation_priority'].eq('High').sum()):,}"),
-        ]
-    )
-    st.plotly_chart(px.histogram(loans, x="expected_loss", nbins=45, title="Expected loss distribution"), width="stretch")
-    st.write("Management actions")
-    for action in management_actions(ratios["cet1_ratio"], liq_lcr, liq_nsfr, quality_score):
-        st.write(f"- {action}")
-    teaching_block(
-        "How do risk, capital, liquidity, financial crime, and governance connect in one executive view?",
-        "Higher PD/LGD -> higher ECL -> higher provisions -> lower profit and CET1 -> lower COREP capital ratios.",
-        "The dashboard turns model outputs into management decisions: capital planning, liquidity actions, collections, and data remediation.",
-        "I built the platform to show the end-to-end chain from borrower risk to regulatory ratios, governance controls, and executive decisions.",
-    )
-
-elif page == "Credit Risk":
+def render_credit_portfolio_view() -> None:
     selected = st.selectbox("Customer loan", loans["loan_id"].head(200))
     row = loans.loc[loans["loan_id"].eq(selected)].iloc[0]
     customer = customers.loc[customers["customer_id"].eq(row["customer_id"])].iloc[0]
@@ -197,7 +167,8 @@ elif page == "Credit Risk":
         "Credit risk combines default likelihood, loss severity, and exposure. I use PD, LGD, and EAD to rank customers and explain risk grades.",
     )
 
-elif page == "Credit Risk Model Development Lab":
+
+def render_credit_model_development_lab() -> None:
     st.subheader("Credit Risk Model Development Lab")
     model_frame, model_result = run_credit_model_lab(customers, loans_raw)
     threshold = st.slider("Default classification threshold", 0.05, 0.95, 0.50, 0.01)
@@ -244,7 +215,8 @@ elif page == "Credit Risk Model Development Lab":
         "This lab shows a realistic model development workflow: baseline model, challenger model, validation metrics, calibration, risk grading, and monitoring evidence.",
     )
 
-elif page == "IFRS 9 ECL":
+
+def render_ifrs9_ecl_calculator() -> None:
     col1, col2, col3 = st.columns(3)
     pd_input = col1.slider("PD", 0.0, 1.0, portfolio_pd, 0.005)
     lgd_input = col2.slider("LGD", 0.0, 1.0, portfolio_lgd, 0.01)
@@ -264,7 +236,8 @@ elif page == "IFRS 9 ECL":
         "IFRS 9 asks what losses are expected. Stage 1 uses 12-month ECL, while Stage 2 and Stage 3 use lifetime ECL in this simplified model.",
     )
 
-elif page == "IFRS 9 Scenario ECL Engine":
+
+def render_ifrs9_scenario_ecl_engine() -> None:
     st.subheader("IFRS 9 Scenario ECL Engine")
     st.write("Scenario-weighted ECL with lifetime PD, stage migration, and provision movement analysis.")
     u1, u2, u3 = st.columns(3)
@@ -315,6 +288,49 @@ elif page == "IFRS 9 Scenario ECL Engine":
         "IFRS 9 provisions should reflect forward-looking information. Scenario weights make the result more realistic than a single deterministic forecast.",
         "This engine shows loan-level stage assignment, lifetime PD, macro scenario weighting, stage migration, and an ECL bridge from opening to closing provision.",
     )
+
+
+if page == "Executive Overview":
+    metrics_row(
+        [
+            ("Portfolio ECL", f"EUR {portfolio_ecl:,.0f}"),
+            ("Stressed CET1 ratio", f"{ratios['cet1_ratio']:.2%}"),
+            ("RWA", f"EUR {base_rwa:,.0f}"),
+            ("Data quality score", f"{quality_score:.1f}%"),
+        ]
+    )
+    metrics_row(
+        [
+            ("LCR", f"{liq_lcr:.1%}"),
+            ("NSFR", f"{liq_nsfr:.1%}"),
+            ("Fraud alerts", f"{int(fraud_scored['risk_label'].eq('Alert').sum()):,}"),
+            ("AML high alerts", f"{int(aml_scored['investigation_priority'].eq('High').sum()):,}"),
+        ]
+    )
+    st.plotly_chart(px.histogram(loans, x="expected_loss", nbins=45, title="Expected loss distribution"), width="stretch")
+    st.write("Management actions")
+    for action in management_actions(ratios["cet1_ratio"], liq_lcr, liq_nsfr, quality_score):
+        st.write(f"- {action}")
+    teaching_block(
+        "How do risk, capital, liquidity, financial crime, and governance connect in one executive view?",
+        "Higher PD/LGD -> higher ECL -> higher provisions -> lower profit and CET1 -> lower COREP capital ratios.",
+        "The dashboard turns model outputs into management decisions: capital planning, liquidity actions, collections, and data remediation.",
+        "I built the platform to show the end-to-end chain from borrower risk to regulatory ratios, governance controls, and executive decisions.",
+    )
+
+elif page == "Credit Risk":
+    credit_mode = st.segmented_control("Mode", ["Portfolio Risk View", "Model Development Lab"], default="Portfolio Risk View")
+    if credit_mode == "Model Development Lab":
+        render_credit_model_development_lab()
+    else:
+        render_credit_portfolio_view()
+
+elif page == "IFRS 9 ECL":
+    ifrs9_mode = st.segmented_control("Mode", ["ECL Calculator", "Scenario ECL Engine"], default="ECL Calculator")
+    if ifrs9_mode == "Scenario ECL Engine":
+        render_ifrs9_scenario_ecl_engine()
+    else:
+        render_ifrs9_ecl_calculator()
 
 elif page == "Basel Capital and IRB":
     exposure = st.number_input("Exposure", min_value=1.0, value=1_000_000.0, step=50_000.0)
