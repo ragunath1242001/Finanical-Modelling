@@ -701,7 +701,12 @@ def _topic_lookup() -> dict[str, tuple[str, dict[str, object]]]:
 def render_study_guide(loans: pd.DataFrame | None = None, cet1: float = 8_500_000.0, rwa_amount: float = 50_000_000.0) -> None:
     st.subheader("Documentation & Study Guide")
     st.write("Use this page as a structured study notebook. Pick a mode, study a topic, practice a case, or test yourself with quizzes.")
-    study_mode = st.segmented_control("Study mode", ["Learning mode", "End-to-End case study mode", "Quiz mode"], default="Learning mode")
+    study_mode = st.radio(
+        "Study mode",
+        ["Learning mode", "End-to-End case study mode", "Quiz mode"],
+        horizontal=True,
+        key="study_mode",
+    )
 
     if study_mode == "End-to-End case study mode":
         render_case_study_mode(loans, cet1, rwa_amount)
@@ -963,10 +968,11 @@ def render_quiz_mode() -> None:
         return
     correct = 0
     answered = 0
+    quiz_key_topic = selected_topic.lower().replace(" ", "_").replace(",", "").replace("/", "_")
     for index, item in enumerate(questions, start=1):
         st.markdown(f"**Q{index}. {item['question']}**")
-        selected = st.radio("Choose one", item["options"], key=f"quiz_{topic_filter}_{index}", index=None)
-        if selected is not None:
+        selected = st.radio("Choose one", ["Not answered yet"] + item["options"], key=f"quiz_{quiz_key_topic}_{index}")
+        if selected != "Not answered yet":
             answered += 1
             if selected == item["answer"]:
                 correct += 1
@@ -1006,7 +1012,7 @@ def render_case_study_mode(loans: pd.DataFrame | None, cet1: float, rwa_amount: 
             ],
         }
     )
-    st.dataframe(flow, width="stretch")
+    st.dataframe(flow, use_container_width=True)
     st.plotly_chart(
         px.bar(
             pd.DataFrame(
@@ -1019,9 +1025,9 @@ def render_case_study_mode(loans: pd.DataFrame | None, cet1: float, rwa_amount: 
             y="amount",
             title="Loss and overlay components",
         ),
-        width="stretch",
+        use_container_width=True,
     )
-    st.dataframe(steps, width="stretch")
+    st.dataframe(steps, use_container_width=True)
     st.download_button(
         "Download case study report",
         markdown_report_bytes(
