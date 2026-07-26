@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import pandas as pd
+import plotly.express as px
 import streamlit as st
+
+from src.reporting.downloads import markdown_report_bytes
+from src.risk.case_studies import CASE_STUDIES, case_study_steps, run_case_study
 
 
 STUDY_GUIDE: dict[str, list[dict[str, object]]] = {
@@ -694,12 +698,15 @@ def _topic_lookup() -> dict[str, tuple[str, dict[str, object]]]:
     return {topic["topic"]: (category, topic) for category, topics in STUDY_GUIDE.items() for topic in topics}
 
 
-def render_study_guide() -> None:
+def render_study_guide(loans: pd.DataFrame | None = None, cet1: float = 8_500_000.0, rwa_amount: float = 50_000_000.0) -> None:
     st.subheader("Documentation & Study Guide")
-    st.write("Use this page as a structured study notebook. Pick a topic from the tree, review the definitions and formulas, then test yourself with questions.")
-    study_mode = st.segmented_control("Study mode", ["Read", "Quiz"], default="Read")
+    st.write("Use this page as a structured study notebook. Pick a mode, study a topic, practice a case, or test yourself with quizzes.")
+    study_mode = st.segmented_control("Study mode", ["Learning mode", "End-to-End case study mode", "Quiz mode"], default="Learning mode")
 
-    if study_mode == "Quiz":
+    if study_mode == "End-to-End case study mode":
+        render_case_study_mode(loans, cet1, rwa_amount)
+        return
+    if study_mode == "Quiz mode":
         render_quiz_mode()
         return
 
@@ -762,8 +769,23 @@ def _render_questions(items: object) -> None:
 
 def _render_calculator(kind: str) -> None:
     if not kind:
-        st.info("This topic is mainly conceptual. Use the other tabs to revise the definitions, project usage, formulas, and questions.")
+        st.info("Hint: this topic is mainly conceptual. Focus on the definitions, project usage, formulas, and practice questions.")
         return
+
+    hints = {
+        "ecl": "Hint: increase PD, LGD, or EAD one at a time. Notice that ECL rises because the formula multiplies all three values.",
+        "ifrs9": "Hint: move days past due above 30 and then above 90. Watch the stage move from Stage 1 to Stage 2 to Stage 3.",
+        "basel": "Hint: increase the risk weight while keeping CET1 fixed. RWA rises and the CET1 ratio falls.",
+        "model_metrics": "Hint: increase false positives to see precision fall, then increase false negatives to see recall fall.",
+        "scenario_ecl": "Hint: increase the downside weight or downside ECL. Weighted ECL should move toward the downside scenario.",
+        "reverse_stress": "Hint: increase the target basis points. The loss needed rises because the capital depletion target is more severe.",
+        "liquidity": "Hint: reduce HQLA or increase cash outflows to see LCR fall below 100%. Reduce ASF or increase RSF to pressure NSFR.",
+        "ai_governance": "Hint: reduce control points or widen the approval-rate gap. This shows governance and fairness risk worsening.",
+        "dora": "Hint: make actual recovery time greater than RTO. The recovery objective will no longer be met.",
+        "climate": "Hint: increase the climate PD multiplier. Adjusted PD rises, showing transition or physical risk pressure.",
+        "xva": "Hint: increase expected positive exposure, counterparty PD, or LGD. CVA increases because counterparty credit risk is higher.",
+    }
+    st.info(hints.get(kind, "Hint: tweak one input at a time and observe which output changes."))
 
     if kind == "ecl":
         pd_value = st.slider("PD", 0.0, 1.0, 0.04, 0.005, key="study_ecl_pd")
@@ -929,9 +951,16 @@ QUIZ_BANK = [
 
 
 def render_quiz_mode() -> None:
-    st.write("Answer the questions first, then expand the explanation. Use the score summary to see where to revise.")
-    topic_filter = st.selectbox("Quiz topic", ["All topics"] + sorted({item["topic"] for item in QUIZ_BANK}))
-    questions = [item for item in QUIZ_BANK if topic_filter == "All topics" or item["topic"] == topic_filter]
+    st.write("Select a topic, answer the questions, then read the explanation. If a topic has no quiz yet, use Learning mode for that topic.")
+    lookup = _topic_lookup()
+    selected_topic = st.selectbox("Select topic", ["All topics"] + all_topics(), key="quiz_topic_select")
+    questions = [item for item in QUIZ_BANK if selected_topic == "All topics" or item["topic"] == selected_topic]
+    if selected_topic != "All topics":
+        category, _ = lookup[selected_topic]
+        st.caption(category)
+    if not questions:
+        st.info("No quiz questions are attached to this topic yet. Use Learning mode for notes and practice questions.")
+        return
     correct = 0
     answered = 0
     for index, item in enumerate(questions, start=1):
@@ -947,3 +976,62 @@ def render_quiz_mode() -> None:
             with st.expander("Explanation"):
                 st.write(item["explanation"])
     st.metric("Score", f"{correct}/{len(questions)}" if answered else "Not started")
+
+
+def render_case_study_mode(loans: pd.DataFrame | None, cet1: float, rwa_amount: float) -> None:
+    st.write("Use these guided cases to practice connecting risk, finance, capital, reporting, and governance end to end.")
+    if loans is None or loans.empty:
+        st.warning("Case study mode needs loan data from the app. Run the Streamlit app normally to load synthetic loans.")
+        return
+    case_name = st.selectbox("Guided scenario", list(CASE_STUDIES), key="docs_case_study")
+    result = run_case_study(loans, case_name, cet1, rwa_amount)
+    steps = case_study_steps(result)
+    cols = st.columns(4)
+    cols[0].metric("Baseline ECL", f"EUR {result['baseline_ecl']:,.0f}")
+    cols[1].metric("Provision increase", f"EUR {result['provision_increase']:,.0f}")
+    cols[2].metric("Post-CET1 ratio", f"{result['post_cet1_ratio']:.2%}")
+    cols[3].metric("CET1 change", f"{result['cet1_ratio_change_bps']:,.0f} bps")
+    st.info(str(result["description"]))
+    flow = pd.DataFrame(
+        {
+            "stage": ["Macro/control trigger", "PD/LGD impact", "IFRS 9 ECL", "Profit", "CET1", "COREP ratio", "Governance"],
+            "value": [
+                str(result["case"]),
+                "Risk parameters deteriorate",
+                f"EUR {result['stressed_ecl']:,.0f}",
+                f"EUR {result['post_profit']:,.0f}",
+                f"EUR {result['post_cet1']:,.0f}",
+                f"{result['post_cet1_ratio']:.2%}",
+                "Issue owner, remediation, audit evidence",
+            ],
+        }
+    )
+    st.dataframe(flow, width="stretch")
+    st.plotly_chart(
+        px.bar(
+            pd.DataFrame(
+                {
+                    "component": ["Provision increase", "Data quality overlay", "Operational loss"],
+                    "amount": [result["provision_increase"], result["data_quality_overlay"], result["operational_loss"]],
+                }
+            ),
+            x="component",
+            y="amount",
+            title="Loss and overlay components",
+        ),
+        width="stretch",
+    )
+    st.dataframe(steps, width="stretch")
+    st.download_button(
+        "Download case study report",
+        markdown_report_bytes(
+            f"Case Study - {case_name}",
+            {
+                "Scenario": str(result["description"]),
+                "Impact": f"Provision increase: EUR {result['provision_increase']:,.0f}\n\nPost-CET1 ratio: {result['post_cet1_ratio']:.2%}",
+                "Steps": "\n".join(f"- {row.step}: {row.explanation}" for row in steps.itertuples(index=False)),
+            },
+        ),
+        file_name="end_to_end_case_study.md",
+        mime="text/markdown",
+    )

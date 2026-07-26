@@ -23,7 +23,6 @@ from src.reporting.downloads import capital_summary_report, dataframe_csv_bytes,
 from src.reporting.executive import management_actions
 from src.reporting.finrep import finrep_metrics
 from src.risk.basel import capital_after_provision, capital_ratios, rwa
-from src.risk.case_studies import CASE_STUDIES, case_study_steps, run_case_study
 from src.risk.climate import climate_adjusted_credit_risk, climate_portfolio_table
 from src.risk.credit_model_lab import (
     calibration_table,
@@ -66,7 +65,6 @@ st.sidebar.title("Risk Platform")
 DOCS_PAGE = "Documentation & Study Guide"
 MAIN_PAGES = [
     "Executive Overview",
-    "End-to-End Risk Case Study",
     "Credit Risk",
     "IFRS 9 ECL",
     "Basel Capital and IRB",
@@ -355,70 +353,6 @@ if page == "Executive Overview":
         "Higher PD/LGD -> higher ECL -> higher provisions -> lower profit and CET1 -> lower COREP capital ratios.",
         "The dashboard turns model outputs into management decisions: capital planning, liquidity actions, collections, and data remediation.",
         "I built the platform to show the end-to-end chain from borrower risk to regulatory ratios, governance controls, and executive decisions.",
-    )
-
-elif page == "End-to-End Risk Case Study":
-    st.subheader("End-to-End Risk Case Study")
-    case_name = st.selectbox("Guided scenario", list(CASE_STUDIES))
-    result = run_case_study(loans_raw, case_name, base_cet1, base_rwa)
-    steps = case_study_steps(result)
-    metrics_row(
-        [
-            ("Baseline ECL", f"EUR {result['baseline_ecl']:,.0f}"),
-            ("Provision increase", f"EUR {result['provision_increase']:,.0f}"),
-            ("Post-CET1 ratio", f"{result['post_cet1_ratio']:.2%}"),
-            ("CET1 change", f"{result['cet1_ratio_change_bps']:,.0f} bps"),
-        ]
-    )
-    st.info(str(result["description"]))
-    flow = pd.DataFrame(
-        {
-            "stage": ["Macro/control trigger", "PD/LGD impact", "IFRS 9 ECL", "Profit", "CET1", "COREP ratio", "Governance"],
-            "value": [
-                str(result["case"]),
-                "Risk parameters deteriorate",
-                f"EUR {result['stressed_ecl']:,.0f}",
-                f"EUR {result['post_profit']:,.0f}",
-                f"EUR {result['post_cet1']:,.0f}",
-                f"{result['post_cet1_ratio']:.2%}",
-                "Issue owner, remediation, audit evidence",
-            ],
-        }
-    )
-    st.dataframe(flow, width="stretch")
-    st.plotly_chart(
-        px.bar(
-            pd.DataFrame(
-                {
-                    "component": ["Provision increase", "Data quality overlay", "Operational loss"],
-                    "amount": [result["provision_increase"], result["data_quality_overlay"], result["operational_loss"]],
-                }
-            ),
-            x="component",
-            y="amount",
-            title="Loss and overlay components",
-        ),
-        width="stretch",
-    )
-    st.dataframe(steps, width="stretch")
-    st.download_button(
-        "Download case study report",
-        markdown_report_bytes(
-            f"Case Study - {case_name}",
-            {
-                "Scenario": str(result["description"]),
-                "Impact": f"Provision increase: EUR {result['provision_increase']:,.0f}\n\nPost-CET1 ratio: {result['post_cet1_ratio']:.2%}",
-                "Steps": "\n".join(f"- {row.step}: {row.explanation}" for row in steps.itertuples(index=False)),
-            },
-        ),
-        file_name="end_to_end_case_study.md",
-        mime="text/markdown",
-    )
-    teaching_block(
-        "How does one event flow across risk, finance, capital, and governance?",
-        "Macro/control trigger -> PD/LGD impact -> ECL increase -> profit reduction -> CET1 decrease -> COREP ratio impact -> governance action.",
-        "A real risk platform should connect calculations to decisions, controls, owners, and evidence.",
-        "Use this page to practice explaining the full chain rather than isolated formulas.",
     )
 
 elif page == "Credit Risk":
@@ -807,5 +741,5 @@ elif page == "XVA Counterparty Risk":
     )
 
 else:
-    render_study_guide()
+    render_study_guide(loans_raw, base_cet1, base_rwa)
 
