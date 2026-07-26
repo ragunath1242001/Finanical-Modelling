@@ -140,6 +140,114 @@ def metrics_row(items: list[tuple[str, str]]) -> None:
         col.metric(label, value)
 
 
+FIELD_DEFINITIONS = {
+    "customers": {
+        "customer_id": "Synthetic customer identifier used to join customers, loans, and transactions.",
+        "age": "Customer age.",
+        "income": "Annual income; includes missing values for data quality testing.",
+        "employment_status": "Employment category used in PD modelling and risk segmentation.",
+        "credit_score": "Synthetic credit score used in PD, explainability, and model development.",
+        "debt_to_income": "Debt-to-income ratio used as an affordability and credit risk driver.",
+        "country": "Customer country code for portfolio segmentation.",
+        "customer_risk": "Simple low/medium/high risk label for segmentation.",
+    },
+    "loans": {
+        "loan_id": "Synthetic loan identifier.",
+        "customer_id": "Customer join key.",
+        "product_type": "Loan product such as mortgage, personal loan, credit card, or SME loan.",
+        "loan_amount": "Original loan amount; includes negative records for quality checks.",
+        "outstanding_balance": "Current balance before EAD conversion.",
+        "ltv": "Loan-to-value ratio used in LGD and secured lending analysis.",
+        "days_past_due": "Delinquency measure used for IFRS 9 staging and default identification.",
+        "default_flag": "Synthetic default marker used for model development and validation.",
+        "pd": "Probability of default used across ECL, stress testing, IRB, and XVA-style thinking.",
+        "lgd": "Loss given default used in expected loss and provision calculations.",
+        "ead": "Exposure at default used in ECL, capital, and concentration analysis.",
+        "last_update_days": "Data freshness indicator used in governance checks.",
+    },
+    "transactions": {
+        "transaction_id": "Synthetic transaction identifier.",
+        "customer_id": "Customer join key.",
+        "amount": "Transaction amount used by fraud and AML rules.",
+        "merchant_category": "Merchant segment used for fraud indicators.",
+        "hour": "Transaction hour used for behaviour context.",
+        "country_risk": "Standard or high country risk flag for AML screening.",
+        "device_mismatch": "Fraud signal showing whether the device differs from normal behaviour.",
+        "velocity_24h": "Number of recent transactions used for velocity risk.",
+        "round_amount": "AML indicator for unusually round amounts.",
+        "rapid_in_out": "AML indicator for quick movement of funds.",
+        "fraud_label": "Synthetic fraud outcome label for testing alert logic.",
+    },
+    "financials": {
+        "month": "Monthly reporting period.",
+        "loan_balances": "Portfolio loan balance trend for forecasting and FINREP-style analysis.",
+        "deposit_balances": "Deposit trend used for balance sheet context.",
+        "net_interest_income": "Monthly NII used in forecasting.",
+        "provisions": "Monthly provision amount used in financial trend analysis.",
+        "fraud_aml_alerts": "Monthly financial crime alert count.",
+    },
+}
+
+
+CAPABILITY_MAP = [
+    ("Credit risk", "PD/LGD/EAD, expected loss, top-risk loans, reason codes, model development lab."),
+    ("IFRS 9", "Stage 1/2/3 logic, 12-month vs lifetime ECL, scenario-weighted ECL, provision bridge."),
+    ("Capital and regulation", "Basel capital ratios, IRB approximation, CRR3 output floor, COREP-style metrics."),
+    ("Stress testing", "Macro shock, reverse stress, geopolitical loss channels, CET1 sensitivity."),
+    ("Liquidity", "LCR, NSFR, leverage, and simple compliance interpretation."),
+    ("Financial crime", "Fraud alert scoring, AML indicators, threshold tuning, alert downloads."),
+    ("Forecasting", "12-month balance, provision, income, and alert trend forecasting."),
+    ("Governance", "BCBS 239 data quality, reconciliation, lineage, audit logging, issue workflow."),
+    ("Model risk", "Validation findings, drift, calibration, confusion matrix, monitoring concepts."),
+    ("EU AI Act and DORA", "AI control assessment, fairness gap, ICT incident classification, resilience checks."),
+    ("Climate and XVA", "Climate-adjusted credit risk and counterparty exposure valuation adjustments."),
+    ("Study guide", "Definitions, formulas, memory hooks, interactive learning, and end-to-end case studies."),
+]
+
+
+def dataset_summary() -> pd.DataFrame:
+    frames = {
+        "Customers": customers,
+        "Loans": loans_raw,
+        "Transactions": transactions,
+        "Financials": financials,
+    }
+    return pd.DataFrame(
+        [
+            {
+                "dataset": name,
+                "rows": len(frame),
+                "fields": len(frame.columns),
+                "missing_values": int(frame.isna().sum().sum()),
+                "duplicate_rows": int(frame.duplicated().sum()),
+            }
+            for name, frame in frames.items()
+        ]
+    )
+
+
+def field_inventory() -> pd.DataFrame:
+    frames = {
+        "customers": customers,
+        "loans": loans_raw,
+        "transactions": transactions,
+        "financials": financials,
+    }
+    rows = []
+    for dataset, frame in frames.items():
+        for column in frame.columns:
+            rows.append(
+                {
+                    "dataset": dataset,
+                    "field": column,
+                    "type": str(frame[column].dtype),
+                    "missing": int(frame[column].isna().sum()),
+                    "definition": FIELD_DEFINITIONS.get(dataset, {}).get(column, "Synthetic project field."),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
 @st.cache_data
 def run_credit_model_lab(customers_data: pd.DataFrame, loans_data: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, object]]:
     frame = prepare_model_frame(customers_data, loans_data)
@@ -316,8 +424,16 @@ def render_ifrs9_scenario_ecl_engine() -> None:
 
 
 if page == "Executive Overview":
-    st.subheader("Executive Risk Dashboard")
-    st.write("A single view of portfolio risk, capital, liquidity, financial crime, governance, and model health indicators.")
+    st.subheader("Executive Overview")
+    st.write("A single starting point for the data loaded into the platform, the risk signals calculated from it, and the modules available for learning and testing.")
+    metrics_row(
+        [
+            ("Customers ingested", f"{customers['customer_id'].nunique():,}"),
+            ("Loans ingested", f"{len(loans_raw):,}"),
+            ("Transactions ingested", f"{len(transactions):,}"),
+            ("Financial months", f"{len(financials):,}"),
+        ]
+    )
     metrics_row(
         [
             ("Portfolio ECL", f"EUR {portfolio_ecl:,.0f}"),
@@ -334,13 +450,82 @@ if page == "Executive Overview":
             ("AML high alerts", f"{int(aml_scored['investigation_priority'].eq('High').sum()):,}"),
         ]
     )
-    st.plotly_chart(px.histogram(loans, x="expected_loss", nbins=45, title="Expected loss distribution"), width="stretch")
-    col_a, col_b = st.columns(2)
-    with col_a:
+
+    overview_tab, data_tab, capability_tab, action_tab = st.tabs(["Dashboard", "Data Ingested", "Learning & Testing", "Actions & Report"])
+
+    with overview_tab:
+        chart_left, chart_right = st.columns([1.4, 1])
+        with chart_left:
+            st.plotly_chart(px.histogram(loans, x="expected_loss", nbins=45, title="Expected loss distribution"), width="stretch")
+        with chart_right:
+            product_ecl = loans.groupby("product_type", as_index=False)["expected_loss"].sum().sort_values("expected_loss", ascending=False)
+            st.plotly_chart(px.bar(product_ecl, x="product_type", y="expected_loss", title="Expected loss by product"), width="stretch")
+        split_left, split_right = st.columns(2)
+        with split_left:
+            stage_counts = (
+                loans_raw.assign(
+                    stage=loans_raw.apply(
+                        lambda row: f"Stage {assign_stage(int(row['days_past_due']), default_flag=bool(row['default_flag']))[0]}",
+                        axis=1,
+                    )
+                )["stage"]
+                .value_counts()
+                .rename_axis("stage")
+                .reset_index(name="loans")
+            )
+            st.plotly_chart(px.pie(stage_counts, names="stage", values="loans", title="IFRS 9 stage mix"), width="stretch")
+        with split_right:
+            crime_counts = fraud_scored["risk_label"].value_counts().rename_axis("risk_label").reset_index(name="transactions")
+            st.plotly_chart(px.bar(crime_counts, x="risk_label", y="transactions", title="Fraud alert distribution"), width="stretch")
+
+    with data_tab:
+        st.write("These are the synthetic datasets currently loaded into the app and used across the risk, reporting, financial crime, and governance modules.")
+        st.dataframe(dataset_summary(), width="stretch")
+        data_left, data_right = st.columns([1, 1])
+        with data_left:
+            st.subheader("Portfolio Snapshot")
+            metrics_row(
+                [
+                    ("Total EAD", f"EUR {portfolio_ead:,.0f}"),
+                    ("Avg PD", f"{portfolio_pd:.2%}"),
+                    ("Avg LGD", f"{portfolio_lgd:.2%}"),
+                ]
+            )
+            st.dataframe(
+                loans.groupby("product_type", as_index=False)
+                .agg(loans=("loan_id", "count"), ead=("ead", "sum"), expected_loss=("expected_loss", "sum"))
+                .sort_values("expected_loss", ascending=False),
+                width="stretch",
+            )
+        with data_right:
+            st.subheader("Data Quality Signals")
+            st.dataframe(quality_table, width="stretch")
+        st.subheader("Field Inventory")
+        st.dataframe(field_inventory(), width="stretch", height=420)
+
+    with capability_tab:
+        st.write("Use this view as a map of what the platform can help you understand, test, and explain.")
+        capability_frame = pd.DataFrame(CAPABILITY_MAP, columns=["area", "what_you_can_learn_or_test"])
+        st.dataframe(capability_frame, width="stretch", hide_index=True)
+        learn_a, learn_b, learn_c = st.columns(3)
+        with learn_a:
+            st.subheader("Risk Calculations")
+            for item in ["Expected loss", "IFRS 9 staging", "Scenario-weighted ECL", "RWA and CET1 ratios", "Reverse stress loss threshold"]:
+                st.write(f"- {item}")
+        with learn_b:
+            st.subheader("Controls and Governance")
+            for item in ["BCBS 239 data quality", "Lineage and reconciliation", "Model validation findings", "AI Act controls", "DORA incident assessment"]:
+                st.write(f"- {item}")
+        with learn_c:
+            st.subheader("Decision Practice")
+            for item in ["Management actions", "Threshold tuning", "Capital sensitivity", "Case study explanation", "Downloadable evidence reports"]:
+                st.write(f"- {item}")
+
+    with action_tab:
         st.subheader("Management Actions")
         for action in management_actions(ratios["cet1_ratio"], liq_lcr, liq_nsfr, quality_score):
             st.write(f"- {action}")
-    with col_b:
+        st.divider()
         st.subheader("Download")
         st.download_button(
             "Download capital summary",
