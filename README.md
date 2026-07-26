@@ -1,30 +1,14 @@
 # European Financial Risk, Regulatory, and Governance Platform
 
-This is an independent educational portfolio project. It simulates how a financial institution connects credit risk, IFRS 9, Basel III, regulatory reporting, stress testing, liquidity, financial crime monitoring, BCBS 239 controls, and model governance.
+This project is a Streamlit-based financial risk platform built with synthetic data. It brings together several areas that are usually discussed separately: credit risk, IFRS 9 expected credit loss, Basel capital, regulatory reporting, liquidity, stress testing, financial crime monitoring, data governance, model governance, operational resilience, climate risk, AI governance, and counterparty risk.
 
-## Why This Project Exists
+The idea behind the project is simple: if one assumption changes, the effect should be visible across the whole risk and reporting chain. For example, if probability of default increases, expected credit loss increases. Higher expected loss increases provisions. Higher provisions reduce profit and retained earnings. Since retained earnings are part of CET1 capital, capital ratios can also fall.
 
-The goal is to make financial risk concepts explainable and interactive. Users can change assumptions and see how PD, LGD, EAD, provisions, profit, CET1, capital ratios, liquidity ratios, fraud alerts, AML alerts, data quality, and governance indicators move together.
+The project is not intended to be a production banking system. It is a learning and simulation tool that uses simplified formulas so the calculations are transparent.
 
-## Target Roles
+## What Is Included
 
-Risk Analyst, Credit Risk Analyst, Risk Data Scientist, Regulatory Reporting Analyst, IFRS 9 Analyst, Basel/Capital Reporting Analyst, Model Risk Analyst, Data Governance Analyst, Financial Crime Analyst, and Financial Services Consultant.
-
-## Architecture
-
-```text
-Synthetic data
-  -> Credit PD/LGD/EAD
-  -> IFRS 9 ECL and staging
-  -> Basel III / IRB / COREP / FINREP
-  -> Stress, liquidity, fraud, AML, forecasting
-  -> BCBS 239 controls, model risk, drift, audit, 1LOD/2LOD
-  -> Executive dashboard and interview mode
-```
-
-Business logic lives in `src/`. The runnable Streamlit UI is in `app.py`.
-
-## Modules
+The app currently contains these sections:
 
 - Executive Overview
 - Credit Risk
@@ -45,71 +29,315 @@ Business logic lives in `src/`. The runnable Streamlit UI is in `app.py`.
 - XVA Counterparty Risk
 - Interview Mode
 
-## Install
+Most pages follow the same structure: input assumptions, calculated outputs, charts or tables, a calculation trace, and a plain-English explanation.
+
+## Main Concepts
+
+### Credit Risk
+
+Credit risk is the risk that a borrower does not repay as agreed. In this project it is represented using three core parameters:
+
+- `PD`: Probability of Default. The likelihood that a borrower defaults.
+- `LGD`: Loss Given Default. The percentage of exposure that may be lost if default happens.
+- `EAD`: Exposure at Default. The amount expected to be outstanding at the time of default.
+
+Expected loss is calculated as:
+
+```text
+Expected Loss = PD x LGD x EAD
+```
+
+The credit risk page lets the user change PD, LGD, and EAD assumptions and see how customer-level and portfolio-level expected loss changes.
+
+### IFRS 9 Expected Credit Loss
+
+IFRS 9 requires banks to estimate expected credit losses before losses actually occur. The project uses a simplified staging approach:
+
+- `Stage 1`: Performing exposure with no significant increase in credit risk.
+- `Stage 2`: Significant increase in credit risk, but not defaulted.
+- `Stage 3`: Defaulted or credit-impaired exposure.
+
+The simplified staging rules are:
+
+- Stage 3 if the loan is defaulted or 90+ days past due.
+- Stage 2 if the loan is 30+ days past due, has material credit score deterioration, or belongs to a severely stressed sector.
+- Stage 1 otherwise.
+
+Stage 1 uses 12-month ECL. Stage 2 and Stage 3 use lifetime ECL in this educational version.
+
+### Basel Capital
+
+Basel capital rules focus on whether a bank has enough capital for its risk profile. The main capital measure used here is `CET1`, or Common Equity Tier 1 capital.
+
+The simplified formulas used in the app are:
+
+```text
+RWA = Exposure x Risk Weight
+CET1 Ratio = CET1 / RWA
+Tier 1 Ratio = (CET1 + AT1) / RWA
+Total Capital Ratio = (CET1 + AT1 + Tier 2) / RWA
+```
+
+`RWA` means risk-weighted assets. A low-risk asset receives a lower risk weight, while a riskier asset receives a higher risk weight.
+
+### IRB
+
+IRB means Internal Ratings-Based approach. It allows banks, subject to regulatory approval, to use internal risk parameters such as PD, LGD, and EAD for regulatory capital calculations.
+
+This project does not implement the full regulatory IRB formula. It uses a simplified approximation to show the difference between standardized and internal-model views.
+
+### CRR3 and Basel Final Reforms
+
+The CRR3 page shows simplified versions of concepts from the final Basel III reforms:
+
+- `Output floor`: A lower bound on internal-model RWA based on standardized RWA.
+- `Operational risk SMA`: A simplified standardized measurement approach for operational risk.
+- `CVA-lite`: A simplified counterparty credit valuation adjustment capital component.
+
+These calculations are meant to show why internal models may still be constrained by standardized capital floors.
+
+### COREP and FINREP
+
+COREP and FINREP are regulatory reporting concepts used in Europe.
+
+- `COREP`: Capital reporting. It focuses on capital resources, RWA, leverage, and capital adequacy.
+- `FINREP`: Financial reporting. It focuses on assets, liabilities, equity, income, provisions, and profit.
+
+The app shows how IFRS 9 provisions can reduce profit and retained earnings, which can then affect CET1 capital in COREP-style reporting.
+
+### Stress Testing
+
+Stress testing applies adverse assumptions to understand how a portfolio or bank might behave under difficult conditions. The app includes baseline, adverse, and severe scenarios.
+
+The stress testing page adjusts PD, LGD, revenue, provisions, and CET1 ratio to show how capital planning can be affected.
+
+### Reverse Stress Testing
+
+Normal stress testing asks:
+
+```text
+What happens if this scenario occurs?
+```
+
+Reverse stress testing asks:
+
+```text
+What scenario would be severe enough to cause a specific failure outcome?
+```
+
+The reverse stress page starts with a target CET1 depletion, such as 300 basis points, and then shows how credit losses, market losses, operational losses, and funding shocks can combine to reach that outcome.
+
+### Liquidity and Leverage
+
+Capital and liquidity are different problems. A bank can appear well capitalized but still face liquidity stress.
+
+The app includes:
+
+```text
+Leverage Ratio = Tier 1 Capital / Total Exposure
+LCR = High Quality Liquid Assets / 30-day Net Cash Outflows
+NSFR = Available Stable Funding / Required Stable Funding
+```
+
+`LCR` focuses on short-term liquidity survival. `NSFR` focuses on longer-term funding stability.
+
+### Fraud and AML
+
+Fraud detection and AML monitoring are related but not the same.
+
+- Fraud detection looks for unauthorized or abusive transactions.
+- AML monitoring looks for suspicious behavior that may indicate money laundering, sanctions risk, structuring, or unusual fund movement.
+
+The project uses synthetic transaction data and simple scoring rules to create alert queues.
+
+### Forecasting
+
+The forecasting page creates simple 12-month forecasts for loan balances, deposit balances, net interest income, provisions, and alert volumes.
+
+The method is intentionally simple: recent trend extrapolation with a macro multiplier and uncertainty bands.
+
+### BCBS 239 Governance
+
+BCBS 239 is about risk data aggregation and risk reporting. The project includes checks for:
+
+- Completeness
+- Accuracy
+- Consistency
+- Timeliness
+- Traceability
+
+The governance page flags missing PD values, invalid loan amounts, duplicate customer IDs, stale records, and exposure mismatches between risk and finance views.
+
+### Model Risk Management
+
+Model risk management covers the full model lifecycle:
+
+```text
+Development -> Validation -> Approval -> Deployment -> Monitoring -> Retirement
+```
+
+The app includes a model inventory, validation findings, drift checks, reason codes, and issue queues.
+
+### EU AI Act Governance
+
+The EU AI Act governance page is a simplified control room for high-risk AI-style use cases such as credit scoring, fraud detection, and AML monitoring.
+
+The page checks whether controls exist for:
+
+- Risk management
+- Data governance
+- Technical documentation
+- Logging and traceability
+- Transparency and explainability
+- Human oversight
+- Accuracy and robustness
+- Post-deployment monitoring
+
+It also includes a simple fairness-gap calculation based on group approval rates.
+
+### DORA Operational Resilience
+
+DORA focuses on digital operational resilience in financial services. The DORA page includes:
+
+- ICT incident classification
+- Critical service impact
+- Third-party provider involvement
+- Recovery time objective (`RTO`)
+- Recovery point objective (`RPO`)
+- Resilience testing
+- Exit planning for critical providers
+
+The page produces a resilience score and a suggested reporting action.
+
+### ESG Climate Credit Risk
+
+The climate page translates transition and physical climate risk into credit risk effects.
+
+- Transition risk can increase PD for sectors exposed to policy, carbon pricing, or business model changes.
+- Physical risk can affect collateral values and therefore LGD.
+
+The page calculates climate-adjusted PD, LGD, and ECL.
+
+### XVA Counterparty Risk
+
+XVA refers to valuation adjustments used in derivatives and counterparty risk.
+
+The project includes simplified versions of:
+
+- `CVA`: Credit Valuation Adjustment, based on counterparty credit risk.
+- `DVA`: Debit Valuation Adjustment, based on own credit risk.
+- `FVA`: Funding Valuation Adjustment, based on funding spread.
+- `MVA`: Margin Valuation Adjustment, based on initial margin funding cost.
+
+This is not a derivatives pricing engine. It is a simplified explanation of the main drivers: exposure, collateral, counterparty PD, LGD, funding spread, margin, and maturity.
+
+## Data
+
+The project uses synthetic data only. The generated datasets include:
+
+- Customers
+- Loans
+- Transactions
+- Financial time series
+
+The synthetic data intentionally includes imperfections:
+
+- Missing income
+- Missing PD
+- Duplicate customer IDs
+- Invalid loan amounts
+- Stale records
+- Risk and finance exposure mismatch
+- Suspicious transaction patterns
+- Fraud labels
+
+This makes the governance and reconciliation pages more realistic.
+
+## Project Structure
+
+```text
+app.py
+requirements.txt
+PROJECT_BUILD_SPEC.md
+data/
+  synthetic/
+docs/
+notebooks/
+src/
+  data/
+  risk/
+  financial_crime/
+  forecasting/
+  governance/
+  reporting/
+  ui/
+tests/
+```
+
+Business logic is kept under `src/`. The Streamlit application is in `app.py`. Tests are under `tests/`.
+
+## Installation
+
+Create and activate a virtual environment:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+Install dependencies:
+
+```powershell
 pip install -r requirements.txt
 ```
 
-## Generate Data
+## Generate Synthetic Data
 
 ```powershell
 python -m src.data.generate_synthetic_data
 ```
 
-The app also generates synthetic data automatically if the CSV files do not exist.
+The app also generates data automatically if the synthetic CSV files are missing.
 
-## Run
+## Run the App
 
 ```powershell
 streamlit run app.py
 ```
 
-## Test
+Then open the local Streamlit URL shown in the terminal.
+
+## Run Tests
 
 ```powershell
 pytest
 ```
 
-## Data Strategy
+The tests cover the main formulas and checks, including IFRS 9 ECL, staging, Basel ratios, liquidity ratios, reconciliation, audit logging, CRR3, reverse stress testing, AI governance, DORA, climate risk, and XVA.
 
-The project uses synthetic data by default and does not require private or confidential data. The generator intentionally introduces missing PD values, missing income, duplicate customer IDs, invalid loan amounts, stale records, fraud labels, suspicious transaction features, and risk/finance reconciliation differences.
+## Limitations
 
-## Regulatory Caveats
+This project is educational and uses simplified formulas. It should not be treated as:
 
-The platform is educational. Basel, CRR3, IRB, COREP, FINREP, IFRS 9, stress testing, fraud, AML, DORA, ESG/climate risk, XVA, drift, AI governance, and governance logic are simplified approximations designed for explanation and interview preparation. The IRB, CVA-lite, operational risk SMA, output floor, reverse stress, climate ECL, and XVA calculations are not production regulatory capital or pricing engines.
+- A production credit risk model
+- A regulatory capital engine
+- A full IFRS 9 impairment engine
+- A COREP or FINREP reporting solution
+- A derivatives pricing or XVA engine
+- A legal interpretation of EU AI Act, DORA, CRR3, Basel, or ESG requirements
 
-## Truthfulness Statement
+The purpose is to make the relationships between risk, finance, regulation, governance, and reporting easier to understand.
 
-This is an independent educational portfolio project. It is inspired by BFSI data governance experience and financial risk learning, but it must not be represented as production work performed for any employer unless that is factually true.
+## Independent Project Statement
 
-## Screenshots
+This is an independent educational project using synthetic data. It should not be represented as production work performed for any employer unless that is factually true.
 
-Run the Streamlit app and capture screenshots from the Executive Overview, IFRS 9, Basel Capital, BCBS 239 Governance, and Model Risk pages.
+## Possible Improvements
 
-## Interview Narrative
-
-When credit risk deteriorates, PD increases. Higher PD increases expected credit loss under IFRS 9. This increases provisions, which reduces profit and retained earnings. Since retained earnings are part of CET1 capital, CET1 can decrease. That reduction then affects capital ratios reported through COREP.
-
-CRR3 and the final Basel III reforms make capital ratios more comparable by constraining internal model outputs through the output floor and by strengthening standardized treatments for credit risk, CVA, and operational risk.
-
-Reverse stress testing starts from a defined failure outcome, such as a 300 basis point CET1 depletion, and asks what geopolitical, credit, market, funding, or operational shock could plausibly cause it.
-
-EU AI Act-style governance requires high-risk AI systems to be explainable, documented, monitored, traceable, subject to human oversight, and supported by strong data governance.
-
-DORA operational resilience connects ICT incidents, third-party providers, RTO/RPO, resilience testing, exit planning, and reporting workflows.
-
-Climate credit risk translates transition and physical risks into PD, LGD, ECL, provisions, and capital planning effects.
-
-XVA connects derivatives valuation with counterparty credit risk, collateral, funding spreads, margin costs, and model validation.
-
-## Roadmap
-
-- Add richer calibration charts for the PD model.
-- Add downloadable COREP/FINREP-style templates.
-- Add more detailed SHAP explainability when optional dependencies are available.
-- Add persistent user scenario storage.
-- Add Monte Carlo exposure simulation for the XVA page.
+- Add downloadable COREP and FINREP-style report templates.
+- Add better model performance charts for the PD and fraud models.
+- Add calibration and backtesting views.
+- Add Monte Carlo exposure simulation for XVA.
+- Add richer climate scenario assumptions by sector and geography.
 - Add downloadable DORA incident and third-party oversight reports.
+- Add persistent scenario storage for comparing multiple stress runs.
