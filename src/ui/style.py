@@ -100,20 +100,22 @@ def inject_custom_style() -> None:
             border-color: rgba(255, 255, 255, 0.44);
             border-radius: 8px;
             position: relative;
-            padding-right: 1.8rem;
+            min-height: 2.45rem;
+            padding-right: 2rem;
         }
 
         section[data-testid="stSidebar"] div[data-baseweb="select"] > div::after {
-            content: "";
+            content: "▼";
             position: absolute;
-            right: 0.85rem;
+            right: 0.75rem;
             top: 50%;
-            transform: translateY(-35%);
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 6px solid var(--teal);
+            transform: translateY(-52%);
+            color: #0B4F4A;
+            font-size: 0.78rem;
+            font-weight: 900;
+            line-height: 1;
             pointer-events: none;
-            z-index: 5;
+            z-index: 10;
         }
 
         section[data-testid="stSidebar"] div[data-baseweb="select"] *,
@@ -124,13 +126,39 @@ def inject_custom_style() -> None:
             -webkit-text-fill-color: #102A43 !important;
         }
 
+        section[data-testid="stSidebar"] div[data-baseweb="select"] [data-baseweb="icon"],
+        section[data-testid="stSidebar"] div[data-baseweb="select"] [aria-hidden="true"],
+        section[data-testid="stSidebar"] div[data-baseweb="select"] div[class*="select"] + div,
         section[data-testid="stSidebar"] div[data-baseweb="select"] svg,
         section[data-testid="stSidebar"] div[data-baseweb="select"] svg * {
-            color: #0F766E !important;
-            fill: #0F766E !important;
-            stroke: #0F766E !important;
+            color: #0B4F4A !important;
+            fill: #0B4F4A !important;
+            stroke: #0B4F4A !important;
             opacity: 1 !important;
             visibility: visible !important;
+        }
+
+        section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+            display: block !important;
+            width: 1.15rem !important;
+            height: 1.15rem !important;
+            min-width: 1.15rem !important;
+        }
+
+        section[data-testid="stSidebar"] [data-testid="stSelectbox"] button[aria-label="Open"],
+        section[data-testid="stSidebar"] [data-testid="stSelectbox"] button[aria-label="Open"] svg,
+        section[data-testid="stSidebar"] [data-testid="stSelectbox"] button[aria-label="Open"] svg *,
+        section[data-testid="stSidebar"] [data-testid="stSelectbox"] button[aria-label="Open"] path {
+            color: #0B4F4A !important;
+            fill: #0B4F4A !important;
+            stroke: #0B4F4A !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        section[data-testid="stSidebar"] [data-testid="stSelectbox"] button[aria-label="Open"] path[fill="none"] {
+            fill: none !important;
+            stroke: none !important;
         }
 
         section[data-testid="stSidebar"] .stSlider [data-testid="stTickBar"] {
