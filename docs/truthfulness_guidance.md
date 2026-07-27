@@ -1,6 +1,6 @@
 # Truthfulness Guidance
 
-This is an independent educational portfolio project using synthetic data and simplified financial and regulatory assumptions. It was not developed for, deployed by or validated within Mu Sigma, TNO, a bank, a regulator or any other employer or client.
+This is an independent educational portfolio project using synthetic data and simplified financial and regulatory assumptions. It was not developed for, deployed by or validated within a bank, regulator, employer or client.
 
 ## What You Can Say
 
@@ -11,7 +11,7 @@ This is an independent educational portfolio project using synthetic data and si
 
 ## What You Must Not Say
 
-- Do not claim this was production work at Mu Sigma unless that is factually true.
+- Do not claim this was production employer work unless that is factually true.
 - Do not claim you implemented production IFRS 9, IRB, COREP, FINREP, or Basel systems at an employer unless that is factually true.
 - Do not describe yourself as a senior risk specialist unless that was your actual role.
 

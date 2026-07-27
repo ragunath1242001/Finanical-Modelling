@@ -4,8 +4,8 @@ APP_NAME = "European Banking Risk & Governance Lab"
 APP_TAGLINE = "Interactive banking risk, regulatory reporting, data governance and model governance learning lab."
 PORTFOLIO_DISCLAIMER = (
     "This is an independent educational portfolio project using synthetic data and simplified financial and "
-    "regulatory assumptions. It was not developed for, deployed by or validated within Mu Sigma, TNO, a bank, "
-    "a regulator or any other employer or client."
+    "regulatory assumptions. It was not developed for, deployed by or validated within a bank, regulator, "
+    "employer or client."
 )
 
 BASE_DIR = Path(__file__).resolve().parents[1]
