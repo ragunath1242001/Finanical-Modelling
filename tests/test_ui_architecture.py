@@ -22,17 +22,18 @@ def test_invalid_page_selection_falls_back_to_overview() -> None:
     assert get_page_renderer("Unknown Page") is executive_overview.render_page
 
 
-def test_sidebar_shortcut_navigation_updates_current_page() -> None:
+def test_sidebar_page_selector_updates_current_page() -> None:
     at = AppTest.from_file("app.py")
     at.run(timeout=30)
     assert not at.exception
 
-    shortcut = next(button for button in at.button if button.label == "Credit Risk")
-    shortcut.click()
+    selector = next(selectbox for selectbox in at.selectbox if selectbox.label == "Select page")
+    selector.set_value("Credit Risk")
     at.run(timeout=30)
 
     assert not at.exception
     assert at.session_state["page"] == "Credit Risk"
+    assert at.session_state["page_picker"] == "Credit Risk"
 
 
 def test_sidebar_learning_mode_button_updates_view_mode() -> None:

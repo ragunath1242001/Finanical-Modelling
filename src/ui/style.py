@@ -52,6 +52,45 @@ def inject_custom_style() -> None:
             color: #F8FAFC !important;
         }
 
+        [data-testid="stSidebarCollapseButton"],
+        [data-testid="collapsedControl"],
+        [data-testid="stBaseButton-headerNoPadding"],
+        section[data-testid="stSidebar"] button[title],
+        section[data-testid="stSidebar"] button[aria-label] {
+            color: #F8FAFC !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        [data-testid="stSidebarCollapseButton"] svg,
+        [data-testid="stSidebarCollapseButton"] svg *,
+        [data-testid="collapsedControl"] svg,
+        [data-testid="collapsedControl"] svg *,
+        [data-testid="stBaseButton-headerNoPadding"] span,
+        [data-testid="stBaseButton-headerNoPadding"] [data-testid="stIconMaterial"],
+        section[data-testid="stSidebar"] button[title] svg,
+        section[data-testid="stSidebar"] button[title] svg *,
+        section[data-testid="stSidebar"] button[aria-label] svg,
+        section[data-testid="stSidebar"] button[aria-label] svg * {
+            color: #F8FAFC !important;
+            fill: #F8FAFC !important;
+            stroke: #F8FAFC !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        [data-testid="stBaseButton-headerNoPadding"] {
+            background: rgba(255, 255, 255, 0.12) !important;
+            border: 1px solid rgba(255, 255, 255, 0.28) !important;
+            border-radius: 8px !important;
+        }
+
+        [data-testid="collapsedControl"] {
+            background: #102A43 !important;
+            border: 1px solid rgba(255, 255, 255, 0.35) !important;
+            border-radius: 8px !important;
+        }
+
         section[data-testid="stSidebar"] [data-testid="stSelectbox"] {
             position: relative;
         }

@@ -51,6 +51,8 @@ NAVIGATION_GROUPS = {
 def initialize_navigation() -> None:
     if "page" not in st.session_state:
         st.session_state.page = "Executive Overview"
+    if "page_picker" not in st.session_state:
+        st.session_state.page_picker = st.session_state.page if st.session_state.page in MAIN_PAGES else "Executive Overview"
     if "view_mode" not in st.session_state:
         st.session_state.view_mode = "Standard View"
     if "scenario" not in st.session_state:
@@ -59,6 +61,12 @@ def initialize_navigation() -> None:
 
 def set_page(page_name: str) -> None:
     st.session_state.page = page_name
+    if page_name in MAIN_PAGES:
+        st.session_state.page_picker = page_name
+
+
+def set_page_from_picker() -> None:
+    set_page(st.session_state.page_picker)
 
 
 def set_view_mode(mode: str) -> None:
@@ -109,28 +117,25 @@ def render_sidebar() -> tuple[str, float, float, str]:
     st.sidebar.caption("Learning View keeps formulas, assumptions and interview prompts visible where pages support them.")
 
     st.sidebar.markdown("#### Navigation")
-    for group_name, pages in NAVIGATION_GROUPS.items():
-        with st.sidebar.expander(group_name, expanded=True):
-            for page_name in pages:
-                _sidebar_state_button(
-                    page_name,
-                    st.session_state.page == page_name,
-                    f"nav_shortcut_{page_name}",
-                    set_page,
-                    (page_name,),
-                )
-
-    with st.sidebar.expander("All page groups", expanded=False):
-        for group_name, pages in NAVIGATION_GROUPS.items():
-            st.markdown(f"**{group_name}**")
-            st.caption(", ".join(pages))
+    if st.session_state.page in MAIN_PAGES and st.session_state.page_picker != st.session_state.page:
+        st.session_state.page_picker = st.session_state.page
+    picker_index = MAIN_PAGES.index(st.session_state.page_picker) if st.session_state.page_picker in MAIN_PAGES else 0
+    st.sidebar.selectbox(
+        "Select page",
+        MAIN_PAGES,
+        index=picker_index,
+        key="page_picker",
+        on_change=set_page_from_picker,
+    )
+    st.sidebar.caption("Use this single page selector for the main app pages.")
 
     st.sidebar.divider()
     pd_shock = st.sidebar.slider("Portfolio PD shock", -20, 100, 0, 5) / 100
     lgd_shock = st.sidebar.slider("Portfolio LGD shock", -20, 80, 0, 5) / 100
     st.sidebar.markdown("#### Scenario")
-    with st.sidebar.expander(f"Current scenario: {st.session_state.scenario}", expanded=False):
-        for scenario_name in SCENARIOS:
+    scenario_columns = st.sidebar.columns(len(SCENARIOS))
+    for column, scenario_name in zip(scenario_columns, SCENARIOS):
+        with column:
             _sidebar_state_button(
                 scenario_name,
                 st.session_state.scenario == scenario_name,
