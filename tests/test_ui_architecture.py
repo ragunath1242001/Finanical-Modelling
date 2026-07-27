@@ -33,7 +33,23 @@ def test_sidebar_shortcut_navigation_updates_current_page() -> None:
 
     assert not at.exception
     assert at.session_state["page"] == "Credit Risk"
-    assert at.session_state["page_select"] == "Credit Risk"
+
+
+def test_sidebar_learning_mode_button_updates_view_mode() -> None:
+    at = AppTest.from_file("app.py")
+    at.run(timeout=30)
+    assert not at.exception
+
+    learning_button = next(
+        button
+        for button in at.button
+        if button.label == "Learning" or getattr(button, "key", "") == "view_mode_learning"
+    )
+    learning_button.click()
+    at.run(timeout=30)
+
+    assert not at.exception
+    assert at.session_state["view_mode"] == "Learning View"
 
 
 def test_page_modules_are_importable() -> None:

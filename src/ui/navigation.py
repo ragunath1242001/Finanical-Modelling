@@ -51,22 +51,34 @@ NAVIGATION_GROUPS = {
 def initialize_navigation() -> None:
     if "page" not in st.session_state:
         st.session_state.page = "Executive Overview"
-    if "page_select" not in st.session_state:
-        st.session_state.page_select = st.session_state.page
     if "view_mode" not in st.session_state:
         st.session_state.view_mode = "Standard View"
-
-
-def set_selected_page() -> None:
-    selected = st.session_state.page_select
-    if selected in MAIN_PAGES:
-        st.session_state.page = selected
+    if "scenario" not in st.session_state:
+        st.session_state.scenario = "Baseline"
 
 
 def set_page(page_name: str) -> None:
     st.session_state.page = page_name
-    if page_name in MAIN_PAGES:
-        st.session_state.page_select = page_name
+
+
+def set_view_mode(mode: str) -> None:
+    st.session_state.view_mode = mode
+
+
+def set_scenario(scenario_name: str) -> None:
+    st.session_state.scenario = scenario_name
+
+
+def _sidebar_state_button(label: str, active: bool, key: str, on_click, args: tuple[str, ...]) -> None:
+    prefix = "Selected: " if active else ""
+    st.button(
+        f"{prefix}{label}",
+        key=key,
+        use_container_width=True,
+        type="primary" if active else "secondary",
+        on_click=on_click,
+        args=args,
+    )
 
 
 def render_sidebar() -> tuple[str, float, float, str]:
@@ -75,40 +87,61 @@ def render_sidebar() -> tuple[str, float, float, str]:
     st.sidebar.caption(PORTFOLIO_DISCLAIMER)
     initialize_navigation()
 
-    st.sidebar.radio("View mode", ["Standard View", "Learning View"], horizontal=False, key="view_mode")
+    st.sidebar.markdown("#### View mode")
+    view_columns = st.sidebar.columns(2)
+    with view_columns[0]:
+        _sidebar_state_button(
+            "Standard",
+            st.session_state.view_mode == "Standard View",
+            "view_mode_standard",
+            set_view_mode,
+            ("Standard View",),
+        )
+    with view_columns[1]:
+        _sidebar_state_button(
+            "Learning",
+            st.session_state.view_mode == "Learning View",
+            "view_mode_learning",
+            set_view_mode,
+            ("Learning View",),
+        )
+    st.sidebar.caption(f"Current view: {st.session_state.view_mode}")
     st.sidebar.caption("Learning View keeps formulas, assumptions and interview prompts visible where pages support them.")
 
-    if st.session_state.page in MAIN_PAGES and st.session_state.page_select != st.session_state.page:
-        st.session_state.page_select = st.session_state.page
-    selected_index = MAIN_PAGES.index(st.session_state.page_select) if st.session_state.page_select in MAIN_PAGES else 0
-    st.sidebar.selectbox(
-        "Page",
-        MAIN_PAGES,
-        index=selected_index,
-        key="page_select",
-        on_change=set_selected_page,
-    )
+    st.sidebar.markdown("#### Navigation")
+    for group_name, pages in NAVIGATION_GROUPS.items():
+        with st.sidebar.expander(group_name, expanded=True):
+            for page_name in pages:
+                _sidebar_state_button(
+                    page_name,
+                    st.session_state.page == page_name,
+                    f"nav_shortcut_{page_name}",
+                    set_page,
+                    (page_name,),
+                )
 
-    with st.sidebar.expander("Page shortcuts", expanded=False):
+    with st.sidebar.expander("All page groups", expanded=False):
         for group_name, pages in NAVIGATION_GROUPS.items():
             st.markdown(f"**{group_name}**")
-            for page_name in pages:
-                st.button(
-                    page_name,
-                    key=f"nav_shortcut_{page_name}",
-                    use_container_width=True,
-                    on_click=set_page,
-                    args=(page_name,),
-                )
+            st.caption(", ".join(pages))
 
     st.sidebar.divider()
     pd_shock = st.sidebar.slider("Portfolio PD shock", -20, 100, 0, 5) / 100
     lgd_shock = st.sidebar.slider("Portfolio LGD shock", -20, 80, 0, 5) / 100
-    scenario = st.sidebar.selectbox("Scenario", list(SCENARIOS))
+    st.sidebar.markdown("#### Scenario")
+    with st.sidebar.expander(f"Current scenario: {st.session_state.scenario}", expanded=False):
+        for scenario_name in SCENARIOS:
+            _sidebar_state_button(
+                scenario_name,
+                st.session_state.scenario == scenario_name,
+                f"scenario_{scenario_name}",
+                set_scenario,
+                (scenario_name,),
+            )
     st.sidebar.divider()
     if st.sidebar.button(DOCS_PAGE):
         set_page(DOCS_PAGE)
     if st.sidebar.button(BANKING_101_PAGE):
         set_page(BANKING_101_PAGE)
     st.sidebar.caption(f"Current page: {st.session_state.page}")
-    return st.session_state.page, pd_shock, lgd_shock, scenario
+    return st.session_state.page, pd_shock, lgd_shock, st.session_state.scenario

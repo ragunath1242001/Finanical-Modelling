@@ -33,6 +33,3 @@ def render_application() -> None:
     except Exception as exc:
         st.error(f"The page '{page}' could not be rendered.")
         st.exception(exc)
-
-
-render_application()
