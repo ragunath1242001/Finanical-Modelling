@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from io import BytesIO
 from xml.sax.saxutils import escape
 
@@ -21,7 +22,14 @@ def pdf_report_bytes(title: str, sections: dict[str, str]) -> bytes:
     buffer = BytesIO()
     document = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=42, leftMargin=42, topMargin=42, bottomMargin=42)
     styles = getSampleStyleSheet()
-    story = [Paragraph(_paragraph_text(title), styles["Title"]), Spacer(1, 14)]
+    story = [
+        Paragraph(_paragraph_text(f"{APP_NAME} - {title}"), styles["Title"]),
+        Spacer(1, 8),
+        Paragraph(_paragraph_text(f"Generated: {date.today().strftime('%d %b %Y')}"), styles["BodyText"]),
+        Spacer(1, 8),
+        Paragraph(_paragraph_text(PORTFOLIO_DISCLAIMER), styles["BodyText"]),
+        Spacer(1, 14),
+    ]
     for heading, body in sections.items():
         story.extend([Paragraph(_paragraph_text(heading), styles["Heading2"]), Spacer(1, 6)])
         for block in body.split("\n"):
@@ -61,3 +69,4 @@ def validation_report(metrics: pd.Series | dict[str, float], model_name: str) ->
             "Recommended Follow-up": "Review calibration, drift, missingness, explainability, and threshold performance before relying on a model.",
         },
     )
+from src.config import APP_NAME, PORTFOLIO_DISCLAIMER

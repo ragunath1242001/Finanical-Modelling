@@ -1,1 +1,1 @@
-"""European Financial Risk, Regulatory, and Governance Platform."""
+"""European Banking Risk & Governance Lab."""

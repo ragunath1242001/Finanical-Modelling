@@ -2,6 +2,10 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.coverage
+htmlcov/
+Upgrade_build_spec.md
+pictures/
 .streamlit/*
 !.streamlit/config.toml
 data/processed/*.sqlite

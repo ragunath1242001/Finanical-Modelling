@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from src.risk.basel import capital_ratios
+from src.risk.validation import RiskValidationError, validate_positive
 
 
 def cet1_depletion_bps(opening_cet1_ratio: float, stressed_cet1_ratio: float) -> float:
@@ -52,3 +53,47 @@ def reverse_stress_solver(
 
 def required_loss_for_target(cet1: float, rwa_amount: float, target_depletion_bps: float) -> float:
     return rwa_amount * (target_depletion_bps / 10_000)
+
+
+def solve_pd_multiplier_for_cet1_threshold(
+    cet1: float,
+    at1: float,
+    tier2: float,
+    rwa_amount: float,
+    ead: float,
+    pd: float,
+    lgd: float,
+    minimum_cet1_ratio: float,
+    max_multiplier: float = 25.0,
+    tolerance: float = 1e-6,
+    max_iterations: int = 80,
+) -> dict[str, float | str | list[float]]:
+    validate_positive(rwa_amount, "RWA")
+    validate_positive(max_multiplier, "Maximum multiplier")
+    path: list[float] = []
+    opening_ratio = capital_ratios(cet1, at1, tier2, rwa_amount)["cet1_ratio"]
+    if opening_ratio <= minimum_cet1_ratio:
+        return {"pd_multiplier": 1.0, "cet1_ratio": opening_ratio, "status": "Already at or below threshold", "path": [1.0]}
+    low, high = 1.0, max_multiplier
+    feasible = False
+    for _ in range(max_iterations):
+        mid = (low + high) / 2
+        stressed_pd = min(pd * mid, 1.0)
+        provision = max(0.0, stressed_pd * lgd * ead - pd * lgd * ead)
+        ratio = capital_ratios(max(cet1 - provision, 0.0), at1, tier2, rwa_amount)["cet1_ratio"]
+        path.append(mid)
+        if ratio <= minimum_cet1_ratio:
+            feasible = True
+            high = mid
+        else:
+            low = mid
+        if abs(ratio - minimum_cet1_ratio) <= tolerance:
+            feasible = True
+            break
+    if not feasible:
+        raise RiskValidationError("No feasible PD multiplier found within the search range.")
+    final_multiplier = high
+    final_pd = min(pd * final_multiplier, 1.0)
+    final_provision = max(0.0, final_pd * lgd * ead - pd * lgd * ead)
+    final_ratio = capital_ratios(max(cet1 - final_provision, 0.0), at1, tier2, rwa_amount)["cet1_ratio"]
+    return {"pd_multiplier": final_multiplier, "cet1_ratio": final_ratio, "status": "Threshold reached", "path": path}

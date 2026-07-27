@@ -1,5 +1,7 @@
 # Truthfulness Guidance
 
+This is an independent educational portfolio project using synthetic data and simplified financial and regulatory assumptions. It was not developed for, deployed by or validated within Mu Sigma, TNO, a bank, a regulator or any other employer or client.
+
 ## What You Can Say
 
 - This is an independent educational portfolio project.
@@ -15,7 +17,7 @@
 
 ## Resume-Safe Phrasing
 
-Independent portfolio project: built a synthetic European financial risk and governance platform covering credit risk, IFRS 9 ECL, Basel III/CRR3 capital, output floor, CVA/XVA-lite, COREP/FINREP-style reporting, reverse stress testing, DORA operational resilience, ESG climate credit risk, financial crime monitoring, BCBS 239 controls, EU AI Act-style controls, and model risk governance.
+Independent portfolio project: built a synthetic European banking risk and governance learning lab covering credit risk, IFRS 9 ECL, Basel III/CRR3 capital, output floor, CVA/XVA-lite, COREP/FINREP-style reporting, reverse stress testing, DORA operational resilience, ESG climate credit risk, financial crime monitoring, BCBS 239 controls, EU AI Act-style controls, and model risk governance.
 
 ## Interview-Safe Phrasing
 

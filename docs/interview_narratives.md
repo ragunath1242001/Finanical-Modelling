@@ -2,7 +2,7 @@
 
 ## Tell me about this project
 
-I built an independent European Financial Risk, Regulatory, and Governance Platform to understand how risk analytics, regulatory reporting, data governance, and model governance connect in financial institutions. The platform simulates credit risk, IFRS 9 expected credit loss, Basel III capital adequacy, COREP/FINREP-style reporting, EBA-style stress testing, AML/fraud monitoring, BCBS 239 controls, and model risk management.
+I built an independent European Banking Risk & Governance Lab to understand how risk analytics, regulatory reporting, data governance, and model governance connect in financial institutions. The platform simulates credit risk, IFRS 9 expected credit loss, Basel III capital adequacy, COREP/FINREP-style reporting, EBA-style stress testing, AML/fraud monitoring, BCBS 239 controls, and model risk management.
 
 ## How does IFRS 9 connect to Basel III?
 

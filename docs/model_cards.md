@@ -22,6 +22,29 @@
 - Owner: Credit Risk / Finance.
 - Validation status: Educational scenario engine.
 
+## Core Risk Engines
+
+- Purpose: Demonstrate validated PD, LGD, EAD, lifetime ECL, staging, scenario weighting, provision movement, CET1 bridge, standardised RWA, IRB-style comparison and stress-to-capital transmission.
+- Inputs: Synthetic portfolio PD, LGD, EAD, term structures, scenario multipliers, risk weights, capital stack and bridge assumptions.
+- Output: Structured calculation results, period-level tables, assumptions, warnings and calculation steps.
+- Method: Transparent educational formulas with validation and deterministic outputs.
+- Limitations: Not a production IFRS 9, Basel, IRB, stress-testing or regulatory-reporting engine.
+- Monitoring: Unit tests for validation, monotonicity, scenario weights, bridges, RWA, output floor, stress chain and reverse stress.
+- Owner: Educational portfolio project.
+- Validation status: Tested educational approximation.
+
+## Fraud Classifier
+
+## Phase 5 Model-Risk Card
+
+- Purpose: Demonstrate model inventory, validation, monitoring, drift, restrictions and lifecycle governance.
+- Intended use: Educational model-risk-management learning.
+- Prohibited use: Production model approval, underwriting, accounting, regulatory submission or legal determination.
+- Data: Synthetic model inventory, validation findings, monitoring history and restrictions.
+- Monitoring: AUC, Brier score, calibration error, PSI, missingness drift and override-rate examples.
+- Governance: Findings can link to Phase 4 governance issues and audit events.
+- Limitation: Thresholds, tiering and approval rules are educational and institution-specific in practice.
+
 ## Fraud Classifier
 
 - Purpose: Prioritize suspicious transactions for fraud review.

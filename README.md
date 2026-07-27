@@ -1,439 +1,268 @@
-# European Financial Risk, Regulatory, and Governance Platform
+# European Banking Risk & Governance Lab
 
-This project is a Streamlit-based financial risk platform built with synthetic data. It brings together several areas that are usually discussed separately: credit risk, IFRS 9 expected credit loss, Basel capital, regulatory reporting, liquidity, stress testing, financial crime monitoring, data governance, model governance, operational resilience, climate risk, AI governance, and counterparty risk.
+An independent educational banking risk, regulatory reporting, data governance and model-risk platform built with Python and Streamlit using synthetic data.
 
-The idea behind the project is simple: if one assumption changes, the effect should be visible across the whole risk and reporting chain. For example, if probability of default increases, expected credit loss increases. Higher expected loss increases provisions. Higher provisions reduce profit and retained earnings. Since retained earnings are part of CET1 capital, capital ratios can also fall.
+Live demo: https://ragunath1242001-finanical-modelling-app-k7vjy7.streamlit.app/
 
-The project is not intended to be a production banking system. It is a learning and simulation tool that uses simplified formulas so the calculations are transparent.
+This project is an educational portfolio demonstration. It is not a production banking system, formal regulatory reporting engine, accounting system, legal interpretation or compliance certification.
 
-Live app: https://ragunath1242001-finanical-modelling-app-k7vjy7.streamlit.app/
+## Demo
 
-## Screenshots
+Run locally:
 
-The screenshots below show the main learning and risk workflow.
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Screenshots currently available:
 
 ![Executive Overview](docs/assets/executive_overview.png)
 
 ![Banking 101](docs/assets/banking_101.png)
 
-## What Is Included
+Additional screenshot capture instructions are in [docs/screenshots_checklist.md](docs/screenshots_checklist.md).
 
-The app currently contains these sections:
+## Executive Overview
 
-- Executive Overview
-- Banking 101
-- Credit Risk
-- IFRS 9 ECL
-- Basel Capital and IRB
-- CRR3 Basel Final Reforms
-- COREP/FINREP Reporting
-- Stress Testing
-- Geopolitical Reverse Stress
-- Liquidity and Leverage
-- Fraud and AML
-- Forecasting
-- BCBS 239 Governance
-- Model Risk Management
-- EU AI Act Governance
-- DORA Operational Resilience
-- ESG Climate Credit Risk
-- XVA Counterparty Risk
-- Documentation & Study Guide
+The platform shows how a synthetic banking portfolio moves through the full risk and governance chain:
 
-Most pages follow the same structure: input assumptions, calculated outputs, charts or tables, a calculation trace, and an explanation.
+```text
+Banking foundations
+-> PD/LGD/EAD
+-> IFRS 9 ECL
+-> provisions and CET1
+-> capital and reporting
+-> BCBS 239 data governance
+-> model-risk monitoring
+-> auditability
+-> executive decision support
+```
 
-The `Banking 101` page is for someone starting from zero. It explains basic banking, loan products, mortgages, collateral, PD, LGD, EAD, IFRS 9, capital, liquidity, fraud, AML, model risk, and regulation before the user enters the deeper modules.
+The aim is to make technical banking concepts visible, testable and explainable for portfolio review and interview preparation.
 
-The `Documentation & Study Guide` page is built into the app as a revision section with two modes:
+## Key Capabilities
 
-- `Learning mode`: topic tree, definitions, project usage, formulas, memory hooks, practice questions, and interactive mini calculators.
-- `End-to-End case study mode`: guided scenarios such as unemployment shock, IFRS 9 data quality issue, model drift, and DORA incident.
+### Banking And Credit Risk
 
-The `Credit Risk` and `IFRS 9 ECL` pages include mode selectors for deeper analysis. Credit Risk contains both the portfolio risk view and the model development lab. IFRS 9 contains both the ECL calculator and the scenario ECL engine.
+- Banking 101 for users starting from zero.
+- Borrower-level PD, LGD, EAD and expected loss.
+- Logistic-regression PD model and gradient-boosting challenger.
+- ROC, AUC, Brier score, calibration, confusion matrix, feature importance and PSI.
 
-The end-to-end case study mode connects several modules into guided scenarios and shows how a trigger flows through PD/LGD, ECL, profit, CET1, COREP-style ratio impact, and governance actions.
+### IFRS 9 And Capital
 
-Several pages also include download buttons for reports such as capital summary, model validation summary, IFRS 9 scenario ECL, ECL bridge, BCBS 239 issue log, DORA incident report, and end-to-end case study report.
+- IFRS 9 educational Stage 1/2/3 rules.
+- 12-month and lifetime ECL.
+- Scenario-weighted ECL.
+- Provision bridge and CET1 bridge.
+- Basel capital ratios, standardised RWA and educational IRB comparison.
+- CRR3 output-floor illustration.
 
-The Executive Overview includes a downloadable data dictionary and field inventory so the user can inspect what each dataset contains and how the fields are used.
+### Stress And Liquidity
+
+- Macro stress testing from PD/LGD/EAD to ECL and capital ratio impact.
+- Reverse stress testing.
+- LCR, NSFR and leverage ratio.
+
+### Regulatory Reporting
+
+- COREP-style capital view.
+- FINREP-style financial view.
+- Reporting-readiness status.
+- Risk-versus-Finance reconciliation.
+
+### BCBS 239 And Data Governance
+
+- Completeness, accuracy, consistency, timeliness, validity, uniqueness, integrity and traceability controls.
+- Synthetic defects and failed-record samples.
+- 1LOD remediation, 2LOD challenge, 3LOD audit-review context.
+- Evidence, issue lifecycle and audit logging.
+- Data lineage and ownership catalogue.
+
+### Model Risk And Monitoring
+
+- Typed model inventory and model versions.
+- Model tiering, lifecycle status and approval decisions.
+- Development evidence and independent validation.
+- Findings, limitations, use restrictions and revalidation triggers.
+- Monitoring thresholds, PSI drift and champion-challenger comparison.
+- Explainability outputs and model confidence on Credit Risk / IFRS 9 pages.
+
+### Financial Crime And Emerging Risk
+
+- Fraud alert scoring and threshold learning.
+- AML rule-based monitoring.
+- EU AI Act-style control assessment.
+- DORA operational-resilience simulator.
+- ESG climate credit-risk overlay.
+- XVA counterparty-risk mini model.
+
+### Learning And Interview Preparation
+
+- Global Standard View / Learning View selector.
+- Banking 101.
+- Documentation and Study Guide.
+- End-to-end case studies.
+- Glossary, formulas, model cards, interview guide and talking points.
+
+## End-To-End Use Cases
+
+### Credit-Risk Chain
+
+```text
+PD/LGD/EAD
+-> ECL
+-> provision
+-> CET1
+-> capital ratio
+-> COREP/FINREP-style reporting
+```
+
+### Governance Chain
+
+```text
+Data-quality failure
+-> issue creation
+-> 1LOD remediation
+-> 2LOD challenge
+-> closure evidence
+-> audit trail
+```
+
+### Model-Risk Chain
+
+```text
+Calibration deterioration
+-> monitoring breach
+-> validation finding
+-> use restriction
+-> revalidation trigger
+-> executive reporting
+```
 
 ## Architecture
 
 ```mermaid
-flowchart LR
-    A[Synthetic Data\ncustomers, loans, transactions, financials] --> B[Data Quality and Governance\nBCBS 239, reconciliation, lineage, audit]
-    A --> C[Risk Engines\nCredit risk, IFRS 9, Basel, CRR3, liquidity, stress, XVA]
-    A --> D[Financial Crime\nFraud and AML alerts]
-    C --> E[Reporting Layer\nCOREP, FINREP, PDF reports, executive metrics]
+flowchart TD
+    A[Synthetic Data] --> B[Risk Engines]
+    A --> C[Financial Crime Analytics]
+    A --> D[Governance Controls]
+    B --> E[Reporting Layer]
+    C --> E
     D --> E
-    B --> E
-    E --> F[Streamlit App\nDashboard, labs, case studies, study guide]
-    G[Banking 101] --> F
-    H[Documentation and Study Guide] --> F
+    F[Model Risk Layer] --> E
+    D --> F
+    E --> G[Streamlit UI]
+    H[Banking 101 and Study Guide] --> G
 ```
 
-The app keeps most calculation logic under `src/` and uses `app.py` mainly as the Streamlit interface layer. This makes the formulas easier to test and keeps the user interface separate from the business logic.
-
-## Role-Based Learning Paths
-
-The Banking 101 section includes role-based paths for common job families:
-
-- `Credit Risk Analyst`: Banking 101, borrower-level expected loss, model development, IFRS 9, stress testing, and study guide questions.
-- `Model Risk Analyst`: model development metrics, validation, drift, monitoring, explainability, fairness, data quality, and governance evidence.
-- `Regulatory Reporting Analyst`: IFRS 9, Basel capital, CRR3, COREP/FINREP, RWA, CET1, and BCBS 239 controls.
-- `Operational Resilience / Governance Analyst`: BCBS 239, DORA, EU AI Act, fraud/AML controls, audit trail, and incident case studies.
-
-## Main Concepts
-
-### Credit Risk
-
-Credit risk is the risk that a borrower does not repay as agreed. In this project it is represented using three core parameters:
-
-- `PD`: Probability of Default. The likelihood that a borrower defaults.
-- `LGD`: Loss Given Default. The percentage of exposure that may be lost if default happens.
-- `EAD`: Exposure at Default. The amount expected to be outstanding at the time of default.
-
-Expected loss is calculated as:
+Dependency direction:
 
 ```text
-Expected Loss = PD x LGD x EAD
+UI pages -> domain services -> reporting/governance/model-risk modules -> synthetic data or local SQLite
 ```
 
-The credit risk page lets the user change PD, LGD, and EAD assumptions and see how customer-level and portfolio-level expected loss changes.
+The root `app.py` is a thin entry point. Page renderers live under `src/ui/pages/`. Financial calculations live under `src/risk/`. Governance and model-risk logic live under `src/governance/` and `src/model_risk/`.
 
-### Credit Risk Model Development Lab
-
-The credit model lab is a deeper modelling workflow. It trains a logistic regression baseline and a gradient boosting challenger model on synthetic borrower and loan data.
-
-The lab includes:
-
-- Train/test split
-- AUC
-- Average precision
-- Brier score
-- Precision and recall at a selected threshold
-- ROC curve
-- Calibration table
-- Confusion matrix
-- Feature importance
-- Risk grades
-- PSI-based monitoring check
-
-This is the deepest modelling section of the project. It is meant to show how a PD model can be developed, evaluated, explained, graded, and monitored.
-
-### IFRS 9 Expected Credit Loss
-
-IFRS 9 requires banks to estimate expected credit losses before losses actually occur. The project uses a simplified staging approach:
-
-- `Stage 1`: Performing exposure with no significant increase in credit risk.
-- `Stage 2`: Significant increase in credit risk, but not defaulted.
-- `Stage 3`: Defaulted or credit-impaired exposure.
-
-The simplified staging rules are:
-
-- Stage 3 if the loan is defaulted or 90+ days past due.
-- Stage 2 if the loan is 30+ days past due, has material credit score deterioration, or belongs to a severely stressed sector.
-- Stage 1 otherwise.
-
-Stage 1 uses 12-month ECL. Stage 2 and Stage 3 use lifetime ECL in this educational version.
-
-### IFRS 9 Scenario ECL Engine
-
-The IFRS 9 scenario engine adds a more realistic forward-looking provision workflow. It calculates ECL under upside, baseline, and downside scenarios and then combines them using scenario weights.
-
-The engine includes:
-
-- Loan-level stage assignment
-- 12-month PD for Stage 1
-- Lifetime PD approximation for Stage 2 and Stage 3
-- Scenario PD and LGD multipliers
-- Scenario-weighted ECL
-- Stage migration table
-- Provision movement bridge
-
-The simplified weighted ECL formula is:
-
-```text
-Weighted ECL =
-  Upside ECL x Upside Weight
-  + Baseline ECL x Baseline Weight
-  + Downside ECL x Downside Weight
-```
-
-### Basel Capital
-
-Basel capital rules focus on whether a bank has enough capital for its risk profile. The main capital measure used here is `CET1`, or Common Equity Tier 1 capital.
-
-The simplified formulas used in the app are:
-
-```text
-RWA = Exposure x Risk Weight
-CET1 Ratio = CET1 / RWA
-Tier 1 Ratio = (CET1 + AT1) / RWA
-Total Capital Ratio = (CET1 + AT1 + Tier 2) / RWA
-```
-
-`RWA` means risk-weighted assets. A low-risk asset receives a lower risk weight, while a riskier asset receives a higher risk weight.
-
-### IRB
-
-IRB means Internal Ratings-Based approach. It allows banks, subject to regulatory approval, to use internal risk parameters such as PD, LGD, and EAD for regulatory capital calculations.
-
-This project does not implement the full regulatory IRB formula. It uses a simplified approximation to show the difference between standardized and internal-model views.
-
-### CRR3 and Basel Final Reforms
-
-The CRR3 page shows simplified versions of concepts from the final Basel III reforms:
-
-- `Output floor`: A lower bound on internal-model RWA based on standardized RWA.
-- `Operational risk SMA`: A simplified standardized measurement approach for operational risk.
-- `CVA-lite`: A simplified counterparty credit valuation adjustment capital component.
-
-These calculations are meant to show why internal models may still be constrained by standardized capital floors.
-
-### COREP and FINREP
-
-COREP and FINREP are regulatory reporting concepts used in Europe.
-
-- `COREP`: Capital reporting. It focuses on capital resources, RWA, leverage, and capital adequacy.
-- `FINREP`: Financial reporting. It focuses on assets, liabilities, equity, income, provisions, and profit.
-
-The app shows how IFRS 9 provisions can reduce profit and retained earnings, which can then affect CET1 capital in COREP-style reporting.
-
-### Stress Testing
-
-Stress testing applies adverse assumptions to understand how a portfolio or bank might behave under difficult conditions. The app includes baseline, adverse, and severe scenarios.
-
-The stress testing page adjusts PD, LGD, revenue, provisions, and CET1 ratio to show how capital planning can be affected.
-
-### Reverse Stress Testing
-
-Normal stress testing asks:
-
-```text
-What happens if this scenario occurs?
-```
-
-Reverse stress testing asks:
-
-```text
-What scenario would be severe enough to cause a specific failure outcome?
-```
-
-The reverse stress page starts with a target CET1 depletion, such as 300 basis points, and then shows how credit losses, market losses, operational losses, and funding shocks can combine to reach that outcome.
-
-### Liquidity and Leverage
-
-Capital and liquidity are different problems. A bank can appear well capitalized but still face liquidity stress.
-
-The app includes:
-
-```text
-Leverage Ratio = Tier 1 Capital / Total Exposure
-LCR = High Quality Liquid Assets / 30-day Net Cash Outflows
-NSFR = Available Stable Funding / Required Stable Funding
-```
-
-`LCR` focuses on short-term liquidity survival. `NSFR` focuses on longer-term funding stability.
-
-### Fraud and AML
-
-Fraud detection and AML monitoring are related but not the same.
-
-- Fraud detection looks for unauthorized or abusive transactions.
-- AML monitoring looks for suspicious behavior that may indicate money laundering, sanctions risk, structuring, or unusual fund movement.
-
-The project uses synthetic transaction data and simple scoring rules to create alert queues.
-
-### Forecasting
-
-The forecasting page creates simple 12-month forecasts for loan balances, deposit balances, net interest income, provisions, and alert volumes.
-
-The method is intentionally simple: recent trend extrapolation with a macro multiplier and uncertainty bands.
-
-### BCBS 239 Governance
-
-BCBS 239 is about risk data aggregation and risk reporting. The project includes checks for:
-
-- Completeness
-- Accuracy
-- Consistency
-- Timeliness
-- Traceability
-
-The governance page flags missing PD values, invalid loan amounts, duplicate customer IDs, stale records, and exposure mismatches between risk and finance views.
-
-### Model Risk Management
-
-Model risk management covers the full model lifecycle:
-
-```text
-Development -> Validation -> Approval -> Deployment -> Monitoring -> Retirement
-```
-
-The app includes a model inventory, validation findings, drift checks, reason codes, and issue queues.
-
-### EU AI Act Governance
-
-The EU AI Act governance page is a simplified control room for high-risk AI-style use cases such as credit scoring, fraud detection, and AML monitoring.
-
-The page checks whether controls exist for:
-
-- Risk management
-- Data governance
-- Technical documentation
-- Logging and traceability
-- Transparency and explainability
-- Human oversight
-- Accuracy and robustness
-- Post-deployment monitoring
-
-It also includes a simple fairness-gap calculation based on group approval rates.
-
-### DORA Operational Resilience
-
-DORA focuses on digital operational resilience in financial services. The DORA page includes:
-
-- ICT incident classification
-- Critical service impact
-- Third-party provider involvement
-- Recovery time objective (`RTO`)
-- Recovery point objective (`RPO`)
-- Resilience testing
-- Exit planning for critical providers
-
-The page produces a resilience score and a suggested reporting action.
-
-### ESG Climate Credit Risk
-
-The climate page translates transition and physical climate risk into credit risk effects.
-
-- Transition risk can increase PD for sectors exposed to policy, carbon pricing, or business model changes.
-- Physical risk can affect collateral values and therefore LGD.
-
-The page calculates climate-adjusted PD, LGD, and ECL.
-
-### XVA Counterparty Risk
-
-XVA refers to valuation adjustments used in derivatives and counterparty risk.
-
-The project includes simplified versions of:
-
-- `CVA`: Credit Valuation Adjustment, based on counterparty credit risk.
-- `DVA`: Debit Valuation Adjustment, based on own credit risk.
-- `FVA`: Funding Valuation Adjustment, based on funding spread.
-- `MVA`: Margin Valuation Adjustment, based on initial margin funding cost.
-
-This is not a derivatives pricing engine. It is a simplified explanation of the main drivers: exposure, collateral, counterparty PD, LGD, funding spread, margin, and maturity.
-
-## Data
-
-The project uses synthetic data only. The generated datasets include:
-
-- Customers
-- Loans
-- Transactions
-- Financial time series
-
-The synthetic data intentionally includes imperfections:
-
-- Missing income
-- Missing PD
-- Duplicate customer IDs
-- Invalid loan amounts
-- Stale records
-- Risk and finance exposure mismatch
-- Suspicious transaction patterns
-- Fraud labels
-
-This makes the governance and reconciliation pages more realistic.
-
-The data is designed as a connected portfolio narrative rather than isolated tables. A user can start with a customer, inspect the loan, calculate expected loss, assign IFRS 9 stage, estimate capital impact, review transaction alerts, check data quality, and download evidence reports. More detail is available in [`docs/portfolio_narrative.md`](docs/portfolio_narrative.md).
-
-## Project Structure
+## Repository Structure
 
 ```text
 app.py
 requirements.txt
-data/
-  synthetic/
+data/synthetic/
 docs/
-notebooks/
 src/
   data/
   risk/
+  governance/
+  model_risk/
+  reporting/
   financial_crime/
   forecasting/
-  governance/
-  reporting/
   ui/
 tests/
 ```
 
-Business logic is kept under `src/`. The Streamlit application is in `app.py`. Tests are under `tests/`.
+## Methodology And Assumptions
 
-## Installation
+Detailed methodology is documented in:
 
-Create and activate a virtual environment:
+- [docs/financial_assumptions.md](docs/financial_assumptions.md)
+- [docs/formulas.md](docs/formulas.md)
+- [docs/model_cards.md](docs/model_cards.md)
+- [docs/bcbs239.md](docs/bcbs239.md)
+- [docs/model_risk_management.md](docs/model_risk_management.md)
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+## Testing
+
+Latest local validation:
+
+```text
+103 passed
+70% source coverage
+Streamlit startup probe: HTTP 200
+All registered pages rendered with AppTest
 ```
 
-Install dependencies:
+Run tests:
 
 ```powershell
-pip install -r requirements.txt
+.\.venv\Scripts\python -m pytest -q
+.\.venv\Scripts\python -m pytest --cov=src --cov-report=term-missing
+.\.venv\Scripts\python -m compileall -q app.py src tests
+.\.venv\Scripts\python -c "import app; print('app import ok')"
 ```
 
-## Generate Synthetic Data
+## Technology Stack
 
-```powershell
-python -m src.data.generate_synthetic_data
-```
+- Python
+- Streamlit
+- pandas
+- NumPy
+- scikit-learn
+- Plotly
+- ReportLab
+- pytest and pytest-cov
+- local SQLite for the educational audit log
 
-The app also generates data automatically if the synthetic CSV files are missing.
+## Synthetic Data Statement
 
-## Run the App
-
-```powershell
-streamlit run app.py
-```
-
-Then open the local Streamlit URL shown in the terminal.
-
-## Run Tests
-
-```powershell
-pytest
-```
-
-The tests cover the main formulas and checks, including IFRS 9 ECL, staging, Basel ratios, liquidity ratios, reconciliation, audit logging, CRR3, reverse stress testing, AI governance, DORA, climate risk, and XVA.
-They also cover Banking 101 content structure and PDF generation.
+All customer, loan, transaction, financial, governance and model-risk records are synthetic. The data intentionally includes defects such as missing income, invalid risk parameters, stale collateral, reconciliation differences and model-monitoring issues so the governance workflows have something realistic to detect.
 
 ## Limitations
 
-This project is educational and uses simplified formulas. It should not be treated as:
+This project is not:
 
-- A production credit risk model
-- A regulatory capital engine
-- A full IFRS 9 impairment engine
-- A COREP or FINREP reporting solution
-- A derivatives pricing or XVA engine
-- A legal interpretation of EU AI Act, DORA, CRR3, Basel, or ESG requirements
+- a production credit-risk model;
+- a formal IFRS 9 accounting engine;
+- a Basel or CRR regulatory capital engine;
+- a COREP or FINREP submission tool;
+- a legal interpretation of EU AI Act, DORA, Basel, CRR3 or IFRS 9;
+- an employer, bank, regulator or client system;
+- a system using real customer data.
 
-The purpose is to make the relationships between risk, finance, regulation, governance, and reporting easier to understand.
+The formulas, thresholds and workflows are simplified educational approximations.
 
-## Independent Project Statement
+## Interview Value
 
-This is an independent educational project using synthetic data. It should not be represented as production work performed for any employer unless that is factually true.
+This project demonstrates practical ability to connect:
 
-## Possible Improvements
+- banking-risk concepts;
+- Python modelling and validation;
+- data quality and reconciliation;
+- model monitoring and drift;
+- governance, evidence and auditability;
+- executive-level risk interpretation.
 
-- Add better model performance charts for the PD and fraud models.
-- Add calibration and backtesting views.
-- Add Monte Carlo exposure simulation for XVA.
-- Add richer climate scenario assumptions by sector and geography.
-- Add persistent scenario storage for comparing multiple stress runs.
-- Add more topic-specific exercises to the in-app documentation page.
+See [docs/portfolio_talking_points.md](docs/portfolio_talking_points.md), [docs/interview_guide.md](docs/interview_guide.md) and [docs/cv_linkedin_examples.md](docs/cv_linkedin_examples.md).
+
+## Deployment
+
+Deployment notes are in [docs/deployment.md](docs/deployment.md). Streamlit Community Cloud can run the app from the root `app.py` with `requirements.txt`.
+
+## Licence
+
+This repository includes an Apache License 2.0 file.

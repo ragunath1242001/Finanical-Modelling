@@ -1,23 +1,27 @@
+"""Compatibility wrappers for model-risk tables."""
+
+from __future__ import annotations
+
 import pandas as pd
+
+from src.model_risk.inventory import inventory_to_frame
+from src.model_risk.validation import findings_frame
 
 
 def model_inventory() -> pd.DataFrame:
-    return pd.DataFrame(
-        [
-            ["Credit PD model", "1.0", "Credit Risk", "Validated with limitations", "Approved", "AUC, calibration, drift", "Synthetic portfolio only"],
-            ["Fraud classifier", "1.0", "Financial Crime", "Independent review pending", "Monitoring", "Precision, recall, alert rate", "Class imbalance"],
-            ["Forecast baseline", "1.0", "Finance Planning", "Developer review", "Approved for education", "MAPE, residual trend", "Simple moving average/regression"],
-        ],
-        columns=["model", "version", "owner", "validation_status", "approval_status", "monitoring_metrics", "known_limitations"],
-    )
+    table = inventory_to_frame()
+    return table.rename(
+        columns={
+            "model": "model",
+            "version": "version",
+            "owner": "owner",
+            "status": "validation_status",
+            "approval": "approval_status",
+            "limitations": "known_limitations",
+        }
+    )[["model", "version", "owner", "validation_status", "approval_status", "monitoring_frequency", "known_limitations"]].rename(columns={"monitoring_frequency": "monitoring_metrics"})
 
 
 def validation_findings() -> pd.DataFrame:
-    return pd.DataFrame(
-        [
-            ["PD-001", "Medium", "Calibration should be benchmarked against observed default rates", "Open"],
-            ["FR-001", "High", "Fraud model threshold must be reviewed for false positives", "In remediation"],
-            ["DQ-001", "Medium", "Missing PD values can distort IFRS 9 provisions", "Open"],
-        ],
-        columns=["finding_id", "severity", "finding", "status"],
-    )
+    table = findings_frame()
+    return table[["finding_id", "severity", "title", "status"]].rename(columns={"title": "finding"})
