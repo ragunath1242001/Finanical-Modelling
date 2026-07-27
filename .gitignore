@@ -6,6 +6,7 @@ __pycache__/
 htmlcov/
 Upgrade_build_spec.md
 pictures/
+streamlit_*.log
 .streamlit/*
 !.streamlit/config.toml
 data/processed/*.sqlite
