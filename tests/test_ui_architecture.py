@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib
 
+from streamlit.testing.v1 import AppTest
+
 from src.risk.stress_testing import SCENARIOS
 from src.ui.context import build_portfolio_context, load_app_data
 from src.ui.navigation import BANKING_101_PAGE, DOCS_PAGE, MAIN_PAGES
@@ -18,6 +20,20 @@ def test_page_registry_covers_navigation_pages() -> None:
 
 def test_invalid_page_selection_falls_back_to_overview() -> None:
     assert get_page_renderer("Unknown Page") is executive_overview.render_page
+
+
+def test_sidebar_shortcut_navigation_updates_current_page() -> None:
+    at = AppTest.from_file("app.py")
+    at.run(timeout=30)
+    assert not at.exception
+
+    shortcut = next(button for button in at.button if button.label == "Credit Risk")
+    shortcut.click()
+    at.run(timeout=30)
+
+    assert not at.exception
+    assert at.session_state["page"] == "Credit Risk"
+    assert at.session_state["page_select"] == "Credit Risk"
 
 
 def test_page_modules_are_importable() -> None:

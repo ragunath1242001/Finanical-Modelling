@@ -51,12 +51,22 @@ NAVIGATION_GROUPS = {
 def initialize_navigation() -> None:
     if "page" not in st.session_state:
         st.session_state.page = "Executive Overview"
+    if "page_select" not in st.session_state:
+        st.session_state.page_select = st.session_state.page
     if "view_mode" not in st.session_state:
         st.session_state.view_mode = "Standard View"
 
 
-def set_main_page() -> None:
-    st.session_state.page = st.session_state.main_page_select
+def set_selected_page() -> None:
+    selected = st.session_state.page_select
+    if selected in MAIN_PAGES:
+        st.session_state.page = selected
+
+
+def set_page(page_name: str) -> None:
+    st.session_state.page = page_name
+    if page_name in MAIN_PAGES:
+        st.session_state.page_select = page_name
 
 
 def render_sidebar() -> tuple[str, float, float, str]:
@@ -68,24 +78,28 @@ def render_sidebar() -> tuple[str, float, float, str]:
     st.sidebar.radio("View mode", ["Standard View", "Learning View"], horizontal=False, key="view_mode")
     st.sidebar.caption("Learning View keeps formulas, assumptions and interview prompts visible where pages support them.")
 
-    group = st.sidebar.selectbox("Navigation group", list(NAVIGATION_GROUPS), index=0)
-    grouped_pages = NAVIGATION_GROUPS[group]
-    if st.session_state.page not in grouped_pages:
-        grouped_index = 0
-    else:
-        grouped_index = grouped_pages.index(st.session_state.page)
-    grouped_choice = st.sidebar.selectbox("Page in group", grouped_pages, index=grouped_index)
-    if grouped_choice != st.session_state.page and grouped_choice in MAIN_PAGES:
-        st.session_state.page = grouped_choice
-
-    selected_index = MAIN_PAGES.index(st.session_state.page) if st.session_state.page in MAIN_PAGES else 0
+    if st.session_state.page in MAIN_PAGES and st.session_state.page_select != st.session_state.page:
+        st.session_state.page_select = st.session_state.page
+    selected_index = MAIN_PAGES.index(st.session_state.page_select) if st.session_state.page_select in MAIN_PAGES else 0
     st.sidebar.selectbox(
-        "All pages",
+        "Page",
         MAIN_PAGES,
         index=selected_index,
-        key="main_page_select",
-        on_change=set_main_page,
+        key="page_select",
+        on_change=set_selected_page,
     )
+
+    with st.sidebar.expander("Page shortcuts", expanded=False):
+        for group_name, pages in NAVIGATION_GROUPS.items():
+            st.markdown(f"**{group_name}**")
+            for page_name in pages:
+                st.button(
+                    page_name,
+                    key=f"nav_shortcut_{page_name}",
+                    use_container_width=True,
+                    on_click=set_page,
+                    args=(page_name,),
+                )
 
     st.sidebar.divider()
     pd_shock = st.sidebar.slider("Portfolio PD shock", -20, 100, 0, 5) / 100
@@ -93,8 +107,8 @@ def render_sidebar() -> tuple[str, float, float, str]:
     scenario = st.sidebar.selectbox("Scenario", list(SCENARIOS))
     st.sidebar.divider()
     if st.sidebar.button(DOCS_PAGE):
-        st.session_state.page = DOCS_PAGE
+        set_page(DOCS_PAGE)
     if st.sidebar.button(BANKING_101_PAGE):
-        st.session_state.page = BANKING_101_PAGE
+        set_page(BANKING_101_PAGE)
     st.sidebar.caption(f"Current page: {st.session_state.page}")
     return st.session_state.page, pd_shock, lgd_shock, scenario
